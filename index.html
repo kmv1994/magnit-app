@@ -523,7 +523,28 @@ link.download='report.csv';
 link.click();
 }
 
-window.addEventListener('DOMContentLoaded',async()=>{
+window.addEventListener('DOMContentLoaded',()=>{
+
+const currentYear=new Date().getFullYear();
+const currentMonth=new Date().getMonth();
+
+for(let y=2025;y<=2100;y++){
+
+let o1=document.createElement('option');
+o1.value=y;
+o1.textContent=y;
+document.getElementById('yearSelect').appendChild(o1);
+
+let o2=document.createElement('option');
+o2.value=y;
+o2.textContent=y;
+document.getElementById('calendarYear').appendChild(o2);
+}
+
+document.getElementById('yearSelect').value=currentYear;
+document.getElementById('calendarYear').value=currentYear;
+document.getElementById('monthSelect').value=currentMonth;
+document.getElementById('calendarMonth').value=currentMonth;
 
 try{
 
@@ -531,8 +552,7 @@ if(window.Telegram && window.Telegram.WebApp){
 
 const tg=window.Telegram.WebApp;
 
-await tg.ready();
-
+tg.ready();
 tg.expand();
 
 setTimeout(()=>{
@@ -543,11 +563,13 @@ if(user && user.id){
 
 TG_USER_ID=String(user.id);
 
-console.log('TG USER:',TG_USER_ID);
+document.getElementById('userInfo').innerHTML=`👋 ${user.first_name || ''} ${user.username ? '@'+user.username : ''}`;
 
 }else{
 
-TG_USER_ID='guest_'+Math.random();
+TG_USER_ID='guest';
+
+document.getElementById('userInfo').innerHTML='👤 Telegram пользователь';
 }
 
 loadUserSettings();
@@ -557,36 +579,27 @@ if(document.getElementById('picks').children.length===0){
 addPick();
 }
 
-const ui=document.getElementById('userInfo');
-
-if(user){
-ui.innerHTML=`👋 ${user.first_name||''} ${user.username?'@'+user.username:''}`;
-}else{
-ui.innerHTML='👤 Telegram пользователь';
-}
-
-},500);
+},300);
 
 }else{
 
-TG_USER_ID='browser_user';
-
-loadUserSettings();
-openSettings();
-
-if(document.getElementById('picks').children.length===0){
-addPick();
-}
+TG_USER_ID='browser';
 
 document.getElementById('userInfo').innerHTML='🌐 Режим браузера';
+
+loadUserSettings();
+openSettings();
+
+if(document.getElementById('picks').children.length===0){
+addPick();
+}
+
 }
 
 }catch(e){
 
 console.log(e);
 
-TG_USER_ID='error_user';
-
 loadUserSettings();
 openSettings();
 
@@ -596,7 +609,6 @@ addPick();
 
 }
 
-const currentYear=new Date().getFullYear();
 const currentMonth=new Date().getMonth();
 
 addPick();
