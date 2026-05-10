@@ -300,8 +300,8 @@ style="width:auto;">
 // НАСТРОЙКИ
 let settings = JSON.parse(localStorage.getItem('settings')) || {
 
-    hourRate:139,
-    cartRate:8,
+    hourRate:150,
+    cartRate:100,
     ndfl:0.13,
 
     rates:{
@@ -850,120 +850,77 @@ function exportExcel(){
 `${d.date};Телеги;${d.carts};${cartSum.toFixed(2).replace('.',',')}\n`;
 
         // ЧАСЫ
-        let hourRate=d.holiday
+        let hourSum=d.hours*(d.holiday
             ? settings.hourRate*2
-            : settings.hourRate;
-
-        let hourSum=d.hours*hourRate;
+            : settings.hourRate);
 
         csv +=
 `${d.date};Часы;${d.hours};${hourSum.toFixed(2).replace('.',',')}\n`;
 
-        // ИТОГИ
+        // ИТОГ ДО НДФЛ
         csv +=
 `${d.date};ИТОГО ДО НДФЛ;;${d.total.toFixed(2).replace('.',',')}\n`;
 
+        // ИТОГ ПОСЛЕ НДФЛ
         csv +=
 `${d.date};ИТОГО ПОСЛЕ НДФЛ;;${d.final.toFixed(2).replace('.',',')}\n`;
     });
 
-    const blob=new Blob(
-        ["\uFEFF"+csv],
+    // UTF-8 BOM
+    const BOM = "\uFEFF";
+
+    // СОЗДАЕМ FILE
+    const file = new File(
+        [BOM + csv],
+        "report.csv",
         {
-            type:"text/csv;charset=utf-8;"
+            type:"text/csv;charset=utf-8"
         }
     );
 
-    const url=URL.createObjectURL(blob);
+    // СОЗДАЕМ URL
+    const url = URL.createObjectURL(file);
 
-    const a=document.createElement("a");
-
-    a.href=url;
-
-    a.download="report.csv";
-
-    document.body.appendChild(a);
-
-    a.click();
-
-    document.body.removeChild(a);
-
-    URL.revokeObjectURL(url);
+    // ОТКРЫВАЕМ
+    window.open(url, "_blank");
 }
 
-    // ===== ГОДА ДЛЯ ОТЧЕТОВ =====
+// ГОДА
+let ySel=document.getElementById('yearSelect');
 
-let yearSelect=document.getElementById('yearSelect');
+for(let y=2025;y<=2035;y++){
 
-// очищаем
-yearSelect.innerHTML='';
+    let o=document.createElement('option');
 
-// добавляем года
+    o.value=y;
+    o.text=y;
+
+    ySel.appendChild(o);
+}
+
+// ГОДА ДЛЯ КАЛЕНДАРЯ
+let calYear=document.getElementById('calendarYear');
+
 for(let y=2025;y<=2100;y++){
 
-    let option=document.createElement('option');
+    let o=document.createElement('option');
 
-    option.value=y;
-    option.text=y;
+    o.value=y;
+    o.text=y;
 
-    yearSelect.appendChild(option);
+    calYear.appendChild(o);
 }
 
-// текущий год
-yearSelect.value=new Date().getFullYear();
+// ТЕКУЩИЙ МЕСЯЦ И ГОД
+let now=new Date();
 
-// ===== ГОДА ДЛЯ ОТЧЕТОВ =====
+document.getElementById('calendarYear').value=
+now.getFullYear();
 
-let yearSelect=document.getElementById('yearSelect');
+document.getElementById('calendarMonth').value=
+now.getMonth();
 
-// очищаем
-yearSelect.innerHTML='';
-
-// добавляем года
-for(let y=2025;y<=2100;y++){
-
-    let option=document.createElement('option');
-
-    option.value=y;
-    option.text=y;
-
-    yearSelect.appendChild(option);
-}
-
-// текущий год
-yearSelect.value=new Date().getFullYear();
-
-
-// ===== ГОДА ДЛЯ КАЛЕНДАРЯ =====
-
-let calendarYear=document.getElementById('calendarYear');
-
-if(calendarYear){
-
-    calendarYear.innerHTML='';
-
-    for(let y=2025;y<=2100;y++){
-
-        let option=document.createElement('option');
-
-        option.value=y;
-        option.text=y;
-
-        calendarYear.appendChild(option);
-    }
-
-    calendarYear.value=new Date().getFullYear();
-}
-
-// текущий месяц
-let monthNow=new Date().getMonth();
-
-document.getElementById('monthSelect').value=monthNow;
-
-if(document.getElementById('calendarMonth')){
-    document.getElementById('calendarMonth').value=monthNow;
-}
 </script>
-    
+
 </body>
 </html>
