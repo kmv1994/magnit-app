@@ -561,13 +561,13 @@ async function exportExcel(){
 
     try{
 
-        await fetch('192.168.0.21:5000/excel',{
+        await fetch('http://192.168.0.21:5000/excel',{
             method:'POST',
             headers:{
                 'Content-Type':'application/json'
             },
             body:JSON.stringify({
-                user_id:TG_USER_ID,
+                user_id:tg_real_id,
                 rows:rows
             })
         });
@@ -621,6 +621,11 @@ window.addEventListener('DOMContentLoaded',()=>{
             if(user && user.id){
 
                 TG_USER_ID=String(user.id);
+
+                localStorage.setItem(
+    'tg_real_id',
+    TG_USER_ID
+);
 
                 document.getElementById('userInfo').innerHTML=`👋 ${user.first_name || ''} ${user.username ? '@'+user.username : ''}`;
 
