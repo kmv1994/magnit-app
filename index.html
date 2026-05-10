@@ -850,52 +850,53 @@ function exportExcel(){
 `${d.date};Телеги;${d.carts};${cartSum.toFixed(2).replace('.',',')}\n`;
 
         // ЧАСЫ
-        let hourSum=d.hours*(d.holiday
+        let hourRate=d.holiday
             ? settings.hourRate*2
-            : settings.hourRate);
+            : settings.hourRate;
+
+        let hourSum=d.hours*hourRate;
 
         csv +=
 `${d.date};Часы;${d.hours};${hourSum.toFixed(2).replace('.',',')}\n`;
 
-        // ИТОГ ДО НДФЛ
+        // ИТОГИ
         csv +=
 `${d.date};ИТОГО ДО НДФЛ;;${d.total.toFixed(2).replace('.',',')}\n`;
 
-        // ИТОГ ПОСЛЕ НДФЛ
         csv +=
 `${d.date};ИТОГО ПОСЛЕ НДФЛ;;${d.final.toFixed(2).replace('.',',')}\n`;
     });
 
-    // UTF-8 BOM
-    const BOM = "\uFEFF";
+    // UTF-8
+    const BOM="\uFEFF";
 
-    // СОЗДАЕМ FILE
-    const file = new File(
+    // BLOB
+    const blob=new Blob(
         [BOM + csv],
-        "report.csv",
         {
-            type:"text/csv;charset=utf-8"
+            type:"text/csv;charset=utf-8;"
         }
     );
 
-    // СОЗДАЕМ URL
-    const url = URL.createObjectURL(file);
+    // URL
+    const url=URL.createObjectURL(blob);
 
-    // ОТКРЫВАЕМ
-    window.open(url, "_blank");
-}
+    // ССЫЛКА
+    const a=document.createElement("a");
 
-// ГОДА
-let ySel=document.getElementById('yearSelect');
+    a.href=url;
 
-for(let y=2025;y<=2035;y++){
+    a.download="report.csv";
 
-    let o=document.createElement('option');
+    document.body.appendChild(a);
 
-    o.value=y;
-    o.text=y;
+    // СКАЧИВАНИЕ
+    a.click();
 
-    ySel.appendChild(o);
+    // УДАЛЕНИЕ
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
 }
 
 // ГОДА ДЛЯ КАЛЕНДАРЯ
