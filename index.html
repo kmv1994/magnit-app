@@ -899,6 +899,28 @@ function exportExcel(){
     URL.revokeObjectURL(url);
 }
 
+    // ===== ГОДА ДЛЯ ОТЧЕТОВ =====
+
+let yearSelect=document.getElementById('yearSelect');
+
+// очищаем
+yearSelect.innerHTML='';
+
+// добавляем года
+for(let y=2025;y<=2100;y++){
+
+    let option=document.createElement('option');
+
+    option.value=y;
+    option.text=y;
+
+    yearSelect.appendChild(option);
+}
+
+// текущий год
+yearSelect.value=new Date().getFullYear();
+
+
 // ГОДА ДЛЯ КАЛЕНДАРЯ
 let calYear=document.getElementById('calendarYear');
 
@@ -921,6 +943,7 @@ now.getFullYear();
 document.getElementById('calendarMonth').value=
 now.getMonth();
 
+    
 </script>
 
 </body>
