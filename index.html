@@ -850,7 +850,9 @@ function exportExcel(){
 `${d.date};Телеги;${d.carts};${cartSum.toFixed(2).replace('.',',')}\n`;
 
         // ЧАСЫ
-        let hourSum=d.hours*settings.hourRate;
+        let hourSum=d.hours*(d.holiday
+            ? settings.hourRate*2
+            : settings.hourRate);
 
         csv +=
 `${d.date};Часы;${d.hours};${hourSum.toFixed(2).replace('.',',')}\n`;
@@ -864,18 +866,23 @@ function exportExcel(){
 `${d.date};ИТОГО ПОСЛЕ НДФЛ;;${d.final.toFixed(2).replace('.',',')}\n`;
     });
 
-    let blob=new Blob(
-        ["\uFEFF"+csv],
-        {type:"text/csv;charset=utf-8;"}
+    // UTF-8 BOM
+    const BOM = "\uFEFF";
+
+    // СОЗДАЕМ FILE
+    const file = new File(
+        [BOM + csv],
+        "report.csv",
+        {
+            type:"text/csv;charset=utf-8"
+        }
     );
 
-    let a=document.createElement('a');
+    // СОЗДАЕМ URL
+    const url = URL.createObjectURL(file);
 
-    a.href=URL.createObjectURL(blob);
-
-    a.download="report.csv";
-
-    a.click();
+    // ОТКРЫВАЕМ
+    window.open(url, "_blank");
 }
 
 // ГОДА
