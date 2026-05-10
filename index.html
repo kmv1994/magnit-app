@@ -523,40 +523,81 @@ link.download='report.csv';
 link.click();
 }
 
-window.addEventListener('DOMContentLoaded',()=>{
+window.addEventListener('DOMContentLoaded',async()=>{
 
 try{
 
-if(window.Telegram && Telegram.WebApp){
+if(window.Telegram && window.Telegram.WebApp){
 
-const tg=Telegram.WebApp;
+const tg=window.Telegram.WebApp;
 
-tg.ready();
+await tg.ready();
+
 tg.expand();
 
-const user=tg.initDataUnsafe.user;
+setTimeout(()=>{
+
+const user=tg.initDataUnsafe?.user;
 
 if(user && user.id){
 
-TG_USER_ID=user.id.toString();
+TG_USER_ID=String(user.id);
 
-document.getElementById('userInfo').innerHTML=`👋 ${user.first_name} ${user.username ? '@'+user.username : ''}`;
+console.log('TG USER:',TG_USER_ID);
 
 }else{
 
-document.getElementById('userInfo').innerHTML='👤 Telegram пользователь';
+TG_USER_ID='guest_'+Math.random();
 }
 
+loadUserSettings();
+openSettings();
+
+if(document.getElementById('picks').children.length===0){
+addPick();
+}
+
+const ui=document.getElementById('userInfo');
+
+if(user){
+ui.innerHTML=`👋 ${user.first_name||''} ${user.username?'@'+user.username:''}`;
 }else{
+ui.innerHTML='👤 Telegram пользователь';
+}
+
+},500);
+
+}else{
+
+TG_USER_ID='browser_user';
+
+loadUserSettings();
+openSettings();
+
+if(document.getElementById('picks').children.length===0){
+addPick();
+}
 
 document.getElementById('userInfo').innerHTML='🌐 Режим браузера';
 }
 
 }catch(e){
+
 console.log(e);
-}
+
+TG_USER_ID='error_user';
 
 loadUserSettings();
+openSettings();
+
+if(document.getElementById('picks').children.length===0){
+addPick();
+}
+
+}
+
+const currentYear=new Date().getFullYear();
+const currentMonth=new Date().getMonth();
 
 addPick();
 
