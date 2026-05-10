@@ -816,7 +816,7 @@ function saveSettings(){
     alert("Настройки сохранены");
 }
 
-// ЭКСПОРТ В НАСТОЯЩИЙ EXCEL XLSX
+// ЭКСПОРТ В EXCEL
 function exportExcel(){
 
     let data=JSON.parse(localStorage.getItem('days')) || [];
@@ -825,15 +825,7 @@ function exportExcel(){
 
     let month=+document.getElementById('monthSelect').value;
 
-    let rows=[];
-
-    // ЗАГОЛОВКИ
-    rows.push([
-        "Дата",
-        "Тип",
-        "Количество",
-        "Сумма"
-    ]);
+    let csv="Дата;Тип;Количество;Сумма\n";
 
     data.forEach(d=>{
 
@@ -847,23 +839,15 @@ function exportExcel(){
         // ПИКИ
         d.picks.forEach(p=>{
 
-            rows.push([
-                d.date,
-                p.type,
-                p.qty,
-                Number(p.sum.toFixed(2))
-            ]);
+            csv +=
+`${d.date};${p.type};${p.qty};${p.sum.toFixed(2).replace('.',',')}\n`;
         });
 
         // ТЕЛЕГИ
         let cartSum=d.carts*settings.cartRate;
 
-        rows.push([
-            d.date,
-            "Телеги",
-            d.carts,
-            Number(cartSum.toFixed(2))
-        ]);
+        csv +=
+`${d.date};Телеги;${d.carts};${cartSum.toFixed(2).replace('.',',')}\n`;
 
         // ЧАСЫ
         let hourRate=d.holiday
@@ -872,58 +856,39 @@ function exportExcel(){
 
         let hourSum=d.hours*hourRate;
 
-        rows.push([
-            d.date,
-            "Часы",
-            d.hours,
-            Number(hourSum.toFixed(2))
-        ]);
+        csv +=
+`${d.date};Часы;${d.hours};${hourSum.toFixed(2).replace('.',',')}\n`;
 
-        // ИТОГ ДО НДФЛ
-        rows.push([
-            d.date,
-            "ИТОГО ДО НДФЛ",
-            "",
-            Number(d.total.toFixed(2))
-        ]);
+        // ИТОГИ
+        csv +=
+`${d.date};ИТОГО ДО НДФЛ;;${d.total.toFixed(2).replace('.',',')}\n`;
 
-        // ИТОГ ПОСЛЕ НДФЛ
-        rows.push([
-            d.date,
-            "ИТОГО ПОСЛЕ НДФЛ",
-            "",
-            Number(d.final.toFixed(2))
-        ]);
-
-        // ПУСТАЯ СТРОКА
-        rows.push(["","","",""]);
+        csv +=
+`${d.date};ИТОГО ПОСЛЕ НДФЛ;;${d.final.toFixed(2).replace('.',',')}\n`;
     });
 
-    // СОЗДАЕМ ТАБЛИЦУ
-    const ws=XLSX.utils.aoa_to_sheet(rows);
-
-    // ШИРИНА КОЛОНОК
-    ws['!cols']=[
-        {wch:15},
-        {wch:35},
-        {wch:15},
-        {wch:15}
-    ];
-
-    // КНИГА
-    const wb=XLSX.utils.book_new();
-
-    XLSX.utils.book_append_sheet(
-        wb,
-        ws,
-        "Отчет"
+    const blob=new Blob(
+        ["\uFEFF"+csv],
+        {
+            type:"text/csv;charset=utf-8;"
+        }
     );
 
-    // СКАЧИВАНИЕ
-    XLSX.writeFile(
-        wb,
-        `report_${year}_${month+1}.xlsx`
-    );
+    const url=URL.createObjectURL(blob);
+
+    const a=document.createElement("a");
+
+    a.href=url;
+
+    a.download="report.csv";
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
 }
 
     // ===== ГОДА ДЛЯ ОТЧЕТОВ =====
@@ -1000,7 +965,5 @@ if(document.getElementById('calendarMonth')){
 }
 </script>
     
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-
 </body>
 </html>
