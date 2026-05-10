@@ -117,8 +117,15 @@ button{
 
 <body>
 
-<div class="header">
-📦 Зарплата кладовщика-отборщика Магнит
+<div id="userInfo"
+style="
+padding:10px;
+background:white;
+font-size:14px;
+text-align:center;
+border-bottom:1px solid #ddd;
+">
+Загрузка пользователя...
 </div>
 
 <!-- КАЛЬКУЛЯТОР -->
@@ -296,7 +303,31 @@ style="width:auto;">
 </div>
 
 <script>
+// TELEGRAM MINI APP
 
+const tg = window.Telegram.WebApp;
+
+// раскрыть на весь экран
+tg.expand();
+
+// готовность приложения
+tg.ready();
+
+// пользователь
+const user = tg.initDataUnsafe.user;
+    if(user){
+
+    document.getElementById('userInfo').innerHTML=`
+    👋 ${user.first_name}
+
+    ${user.username
+        ? '@'+user.username
+        : ''
+    }
+    `;
+}
+
+console.log(user);
 // НАСТРОЙКИ
 let settings = JSON.parse(localStorage.getItem('settings')) || {
 
@@ -922,5 +953,7 @@ now.getMonth();
 
 </script>
 
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
 </body>
 </html>
