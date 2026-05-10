@@ -816,7 +816,7 @@ function saveSettings(){
     alert("Настройки сохранены");
 }
 
-// ЭКСПОРТ В EXCEL
+// ЭКСПОРТ В НАСТОЯЩИЙ EXCEL XLSX
 function exportExcel(){
 
     let data=JSON.parse(localStorage.getItem('days')) || [];
@@ -825,7 +825,15 @@ function exportExcel(){
 
     let month=+document.getElementById('monthSelect').value;
 
-    let csv="Дата;Тип;Количество;Сумма\n";
+    let rows=[];
+
+    // ЗАГОЛОВКИ
+    rows.push([
+        "Дата",
+        "Тип",
+        "Количество",
+        "Сумма"
+    ]);
 
     data.forEach(d=>{
 
@@ -839,15 +847,23 @@ function exportExcel(){
         // ПИКИ
         d.picks.forEach(p=>{
 
-            csv +=
-`${d.date};${p.type};${p.qty};${p.sum.toFixed(2).replace('.',',')}\n`;
+            rows.push([
+                d.date,
+                p.type,
+                p.qty,
+                Number(p.sum.toFixed(2))
+            ]);
         });
 
         // ТЕЛЕГИ
         let cartSum=d.carts*settings.cartRate;
 
-        csv +=
-`${d.date};Телеги;${d.carts};${cartSum.toFixed(2).replace('.',',')}\n`;
+        rows.push([
+            d.date,
+            "Телеги",
+            d.carts,
+            Number(cartSum.toFixed(2))
+        ]);
 
         // ЧАСЫ
         let hourRate=d.holiday
@@ -856,47 +872,58 @@ function exportExcel(){
 
         let hourSum=d.hours*hourRate;
 
-        csv +=
-`${d.date};Часы;${d.hours};${hourSum.toFixed(2).replace('.',',')}\n`;
+        rows.push([
+            d.date,
+            "Часы",
+            d.hours,
+            Number(hourSum.toFixed(2))
+        ]);
 
-        // ИТОГИ
-        csv +=
-`${d.date};ИТОГО ДО НДФЛ;;${d.total.toFixed(2).replace('.',',')}\n`;
+        // ИТОГ ДО НДФЛ
+        rows.push([
+            d.date,
+            "ИТОГО ДО НДФЛ",
+            "",
+            Number(d.total.toFixed(2))
+        ]);
 
-        csv +=
-`${d.date};ИТОГО ПОСЛЕ НДФЛ;;${d.final.toFixed(2).replace('.',',')}\n`;
+        // ИТОГ ПОСЛЕ НДФЛ
+        rows.push([
+            d.date,
+            "ИТОГО ПОСЛЕ НДФЛ",
+            "",
+            Number(d.final.toFixed(2))
+        ]);
+
+        // ПУСТАЯ СТРОКА
+        rows.push(["","","",""]);
     });
 
-    // UTF-8
-    const BOM="\uFEFF";
+    // СОЗДАЕМ ТАБЛИЦУ
+    const ws=XLSX.utils.aoa_to_sheet(rows);
 
-    // BLOB
-    const blob=new Blob(
-        [BOM + csv],
-        {
-            type:"text/csv;charset=utf-8;"
-        }
+    // ШИРИНА КОЛОНОК
+    ws['!cols']=[
+        {wch:15},
+        {wch:35},
+        {wch:15},
+        {wch:15}
+    ];
+
+    // КНИГА
+    const wb=XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(
+        wb,
+        ws,
+        "Отчет"
     );
 
-    // URL
-    const url=URL.createObjectURL(blob);
-
-    // ССЫЛКА
-    const a=document.createElement("a");
-
-    a.href=url;
-
-    a.download="report.csv";
-
-    document.body.appendChild(a);
-
     // СКАЧИВАНИЕ
-    a.click();
-
-    // УДАЛЕНИЕ
-    document.body.removeChild(a);
-
-    URL.revokeObjectURL(url);
+    XLSX.writeFile(
+        wb,
+        `report_${year}_${month+1}.xlsx`
+    );
 }
 
     // ===== ГОДА ДЛЯ ОТЧЕТОВ =====
@@ -972,6 +999,7 @@ if(document.getElementById('calendarMonth')){
     document.getElementById('calendarMonth').value=monthNow;
 }
 </script>
-
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    
 </body>
 </html>
