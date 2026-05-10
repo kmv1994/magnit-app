@@ -219,7 +219,30 @@ margin-top:8px;
 
 <script>
 
-let settings=JSON.parse(localStorage.getItem('settings')) || {
+let TG_USER_ID='guest';
+
+try{
+
+if(window.Telegram && Telegram.WebApp){
+
+const tg=Telegram.WebApp;
+const user=tg.initDataUnsafe.user;
+
+if(user){
+TG_USER_ID=user.id.toString();
+}
+
+}
+
+}catch(e){
+console.log(e);
+}
+
+function userKey(key){
+return key+'_'+TG_USER_ID;
+}
+
+let settings=JSON.parse(localStorage.getItem(userKey('settings'))) || {
 hourRate:140,
 cartRate:9,
 ndfl:0.13,
@@ -267,7 +290,7 @@ let hours=+document.getElementById('hours').value||0;
 let carts=+document.getElementById('carts').value||0;
 let holiday=document.getElementById('holiday').checked;
 
-let calendar=JSON.parse(localStorage.getItem('calendar'))||[];
+let calendar=JSON.parse(localStorage.getItem(userKey('calendar')))||[];
 let found=calendar.find(d=>d.date===date);
 
 if(found && found.type==='off'){
@@ -314,21 +337,21 @@ return {date,hours,carts,picks,total,final,holiday};
 function saveDay(){
 let d=calculate();
 if(!d)return;
-let arr=JSON.parse(localStorage.getItem('days'))||[];
+let arr=JSON.parse(localStorage.getItem(userKey('days')))||[];
 arr.push(d);
-localStorage.setItem('days',JSON.stringify(arr));
+localStorage.setItem(userKey('days'),JSON.stringify(arr));
 alert('Сохранено');
 }
 
 function deleteDay(index){
-let arr=JSON.parse(localStorage.getItem('days'))||[];
+let arr=JSON.parse(localStorage.getItem(userKey('days')))||[];
 arr.splice(index,1);
-localStorage.setItem('days',JSON.stringify(arr));
+localStorage.setItem(userKey('days'),JSON.stringify(arr));
 loadReports();
 }
 
 function loadReports(){
-let data=JSON.parse(localStorage.getItem('days'))||[];
+let data=JSON.parse(localStorage.getItem(userKey('days')))||[];
 let year=+document.getElementById('yearSelect').value;
 let month=+document.getElementById('monthSelect').value;
 
@@ -393,7 +416,7 @@ summary+=`
 
 document.getElementById('summary').innerHTML=summary;
 
-let calendar=JSON.parse(localStorage.getItem('calendar'))||[];
+let calendar=JSON.parse(localStorage.getItem(userKey('calendar')))||[];
 
 let workDays=calendar.filter(d=>{
 let dt=new Date(d.date);
@@ -429,12 +452,12 @@ type
 });
 }
 
-localStorage.setItem('calendar',JSON.stringify(arr));
+localStorage.setItem(userKey('calendar'),JSON.stringify(arr));
 renderCalendar();
 }
 
 function renderCalendar(){
-let data=JSON.parse(localStorage.getItem('calendar'))||[];
+let data=JSON.parse(localStorage.getItem(userKey('calendar')))||[];
 let year=+document.getElementById('calendarYear').value;
 let month=+document.getElementById('calendarMonth').value;
 
@@ -454,9 +477,9 @@ document.getElementById('calendarList').innerHTML=html;
 }
 
 function toggleDay(i){
-let data=JSON.parse(localStorage.getItem('calendar'))||[];
+let data=JSON.parse(localStorage.getItem(userKey('calendar')))||[];
 data[i].type=data[i].type==='work'?'off':'work';
-localStorage.setItem('calendar',JSON.stringify(data));
+localStorage.setItem(userKey('calendar'),JSON.stringify(data));
 renderCalendar();
 }
 
@@ -483,12 +506,12 @@ document.querySelectorAll('#ratesList input').forEach(i=>{
 settings.rates[i.dataset.type]=+i.value;
 });
 
-localStorage.setItem('settings',JSON.stringify(settings));
+localStorage.setItem(userKey('settings'),JSON.stringify(settings));
 alert('Сохранено');
 }
 
 function exportExcel(){
-let data=JSON.parse(localStorage.getItem('days'))||[];
+let data=JSON.parse(localStorage.getItem(userKey('days')))||[];
 let csv='Дата;Тип;Количество;Сумма\n';
 
 data.forEach(d=>{
