@@ -500,7 +500,7 @@ localStorage.setItem(userKey('settings'),JSON.stringify(settings));
 alert('Сохранено');
 }
 
-function exportExcel(){
+async function exportExcel(){
 
     let data = JSON.parse(
         localStorage.getItem(
@@ -510,8 +510,7 @@ function exportExcel(){
 
     if(data.length===0){
 
-        alert('Нет данных для экспорта');
-
+        alert('Нет данных');
         return;
     }
 
@@ -522,105 +521,65 @@ function exportExcel(){
         d.picks.forEach(p=>{
 
             rows.push({
-                'Дата': d.date,
-                'Тип': p.type,
-                'Количество': p.qty,
-                'Сумма': Number(p.sum.toFixed(2))
+                date:d.date,
+                type:p.type,
+                qty:p.qty,
+                sum:p.sum.toFixed(2)
             });
 
         });
 
         rows.push({
-            'Дата': d.date,
-            'Тип': 'Телеги',
-            'Количество': d.carts,
-            'Сумма': Number(
-                (
-                    d.carts *
-                    settings.cartRate
-                ).toFixed(2)
-            )
+            date:d.date,
+            type:'Телеги',
+            qty:d.carts,
+            sum:(d.carts*settings.cartRate).toFixed(2)
         });
 
         rows.push({
-            'Дата': d.date,
-            'Тип': 'Часы',
-            'Количество': d.hours,
-            'Сумма': Number(
-                (
-                    d.hours *
-                    settings.hourRate
-                ).toFixed(2)
-            )
+            date:d.date,
+            type:'Часы',
+            qty:d.hours,
+            sum:(d.hours*settings.hourRate).toFixed(2)
         });
 
         rows.push({
-            'Дата': d.date,
-            'Тип': 'ИТОГО ДО НДФЛ',
-            'Количество': '',
-            'Сумма': Number(
-                d.total.toFixed(2)
-            )
+            date:d.date,
+            type:'ИТОГО ДО НДФЛ',
+            qty:'',
+            sum:d.total.toFixed(2)
         });
 
         rows.push({
-            'Дата': d.date,
-            'Тип': 'ИТОГО ПОСЛЕ НДФЛ',
-            'Количество': '',
-            'Сумма': Number(
-                d.final.toFixed(2)
-            )
+            date:d.date,
+            type:'ИТОГО ПОСЛЕ НДФЛ',
+            qty:'',
+            sum:d.final.toFixed(2)
         });
 
     });
 
-    const worksheet =
-    XLSX.utils.json_to_sheet(rows);
+    try{
 
-    const workbook =
-    XLSX.utils.book_new();
+        await fetch('192.168.0.21:5000/excel',{
+            method:'POST',
+            headers:{
+                'Content-Type':'application/json'
+            },
+            body:JSON.stringify({
+                user_id:TG_USER_ID,
+                rows:rows
+            })
+        });
 
-    XLSX.utils.book_append_sheet(
-        workbook,
-        worksheet,
-        'Отчет'
-    );
+        alert('Excel отправлен в Telegram');
 
-    const excelBuffer =
-    XLSX.write(
-        workbook,
-        {
-            bookType:'xlsx',
-            type:'array'
-        }
-    );
+    }catch(e){
 
-    const blob =
-    new Blob(
-        [excelBuffer],
-        {
-            type:
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        }
-    );
+        console.log(e);
 
-    const url =
-    URL.createObjectURL(blob);
-
-    const a =
-    document.createElement('a');
-
-    a.href=url;
-
-    a.download='magnit_report.xlsx';
-
-    document.body.appendChild(a);
-
-    a.click();
-
-    document.body.removeChild(a);
-
-    URL.revokeObjectURL(url);
+        alert('Ошибка отправки');
+    }
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
