@@ -920,30 +920,57 @@ for(let y=2025;y<=2100;y++){
 // текущий год
 yearSelect.value=new Date().getFullYear();
 
+// ===== ГОДА ДЛЯ ОТЧЕТОВ =====
 
-// ГОДА ДЛЯ КАЛЕНДАРЯ
-let calYear=document.getElementById('calendarYear');
+let yearSelect=document.getElementById('yearSelect');
 
+// очищаем
+yearSelect.innerHTML='';
+
+// добавляем года
 for(let y=2025;y<=2100;y++){
 
-    let o=document.createElement('option');
+    let option=document.createElement('option');
 
-    o.value=y;
-    o.text=y;
+    option.value=y;
+    option.text=y;
 
-    calYear.appendChild(o);
+    yearSelect.appendChild(option);
 }
 
-// ТЕКУЩИЙ МЕСЯЦ И ГОД
-let now=new Date();
+// текущий год
+yearSelect.value=new Date().getFullYear();
 
-document.getElementById('calendarYear').value=
-now.getFullYear();
 
-document.getElementById('calendarMonth').value=
-now.getMonth();
+// ===== ГОДА ДЛЯ КАЛЕНДАРЯ =====
 
-    
+let calendarYear=document.getElementById('calendarYear');
+
+if(calendarYear){
+
+    calendarYear.innerHTML='';
+
+    for(let y=2025;y<=2100;y++){
+
+        let option=document.createElement('option');
+
+        option.value=y;
+        option.text=y;
+
+        calendarYear.appendChild(option);
+    }
+
+    calendarYear.value=new Date().getFullYear();
+}
+
+// текущий месяц
+let monthNow=new Date().getMonth();
+
+document.getElementById('monthSelect').value=monthNow;
+
+if(document.getElementById('calendarMonth')){
+    document.getElementById('calendarMonth').value=monthNow;
+}
 </script>
 
 </body>
