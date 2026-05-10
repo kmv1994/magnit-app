@@ -525,135 +525,77 @@ link.click();
 
 window.addEventListener('DOMContentLoaded',()=>{
 
-const currentYear=new Date().getFullYear();
-const currentMonth=new Date().getMonth();
+    // ГОДА
+    const currentYear=new Date().getFullYear();
+    const currentMonth=new Date().getMonth();
 
-for(let y=2025;y<=2100;y++){
+    for(let y=2025;y<=2100;y++){
 
-let o1=document.createElement('option');
-o1.value=y;
-o1.textContent=y;
-document.getElementById('yearSelect').appendChild(o1);
+        const o1=document.createElement('option');
+        o1.value=y;
+        o1.textContent=y;
+        document.getElementById('yearSelect').appendChild(o1);
 
-let o2=document.createElement('option');
-o2.value=y;
-o2.textContent=y;
-document.getElementById('calendarYear').appendChild(o2);
-}
+        const o2=document.createElement('option');
+        o2.value=y;
+        o2.textContent=y;
+        document.getElementById('calendarYear').appendChild(o2);
+    }
 
-document.getElementById('yearSelect').value=currentYear;
-document.getElementById('calendarYear').value=currentYear;
-document.getElementById('monthSelect').value=currentMonth;
-document.getElementById('calendarMonth').value=currentMonth;
+    document.getElementById('yearSelect').value=currentYear;
+    document.getElementById('calendarYear').value=currentYear;
+    document.getElementById('monthSelect').value=currentMonth;
+    document.getElementById('calendarMonth').value=currentMonth;
 
-try{
+    // TELEGRAM
+    try{
 
-if(window.Telegram && window.Telegram.WebApp){
+        if(window.Telegram && window.Telegram.WebApp){
 
-const tg=window.Telegram.WebApp;
+            const tg=window.Telegram.WebApp;
 
-tg.ready();
-tg.expand();
+            tg.ready();
+            tg.expand();
 
-setTimeout(()=>{
+            const user=tg.initDataUnsafe?.user;
 
-const user=tg.initDataUnsafe?.user;
+            if(user && user.id){
 
-if(user && user.id){
+                TG_USER_ID=String(user.id);
 
-TG_USER_ID=String(user.id);
+                document.getElementById('userInfo').innerHTML=`👋 ${user.first_name || ''} ${user.username ? '@'+user.username : ''}`;
 
-document.getElementById('userInfo').innerHTML=`👋 ${user.first_name || ''} ${user.username ? '@'+user.username : ''}`;
+            }else{
 
-}else{
+                TG_USER_ID='guest';
 
-TG_USER_ID='guest';
+                document.getElementById('userInfo').innerHTML='👤 Telegram пользователь';
+            }
 
-document.getElementById('userInfo').innerHTML='👤 Telegram пользователь';
-}
+        }else{
 
-loadUserSettings();
-openSettings();
+            TG_USER_ID='browser';
 
-if(document.getElementById('picks').children.length===0){
-addPick();
-}
+            document.getElementById('userInfo').innerHTML='🌐 Режим браузера';
+        }
 
-},300);
+    }catch(e){
 
-}else{
+        console.log(e);
 
-TG_USER_ID='browser';
+        TG_USER_ID='error';
 
-document.getElementById('userInfo').innerHTML='🌐 Режим браузера';
+        document.getElementById('userInfo').innerHTML='⚠️ Ошибка Telegram';
+    }
 
-loadUserSettings();
-openSettings();
+    // ЗАГРУЗКА ДАННЫХ
+    loadUserSettings();
+    openSettings();
 
-if(document.getElementById('picks').children.length===0){
-addPick();
-}
-
-}
-
-}catch(e){
-
-console.log(e);
-
-loadUserSettings();
-openSettings();
-
-if(document.getElementById('picks').children.length===0){
-addPick();
-}
-
-}
-
-const currentMonth=new Date().getMonth();
-
-addPick();
-
-for(let y=2025;y<=2100;y++){
-let o1=document.createElement('option');
-o1.value=y;
-o1.textContent=y;
-document.getElementById('yearSelect').appendChild(o1);
-
-let o2=document.createElement('option');
-o2.value=y;
-o2.textContent=y;
-document.getElementById('calendarYear').appendChild(o2);
-}
-
-let currentYear=new Date().getFullYear();
-let currentMonth=new Date().getMonth();
-
-document.getElementById('yearSelect').value=currentYear;
-document.getElementById('calendarYear').value=currentYear;
-document.getElementById('monthSelect').value=currentMonth;
-document.getElementById('calendarMonth').value=currentMonth;
-
-openSettings();
-
-try{
-if(window.Telegram && Telegram.WebApp){
-const tg=Telegram.WebApp;
-tg.ready();
-tg.expand();
-
-const user=tg.initDataUnsafe.user;
-
-if(user){
-document.getElementById('userInfo').innerHTML=`👋 ${user.first_name} ${user.username?'@'+user.username:''}`;
-}else{
-document.getElementById('userInfo').innerHTML='👤 Telegram пользователь';
-}
-}else{
-document.getElementById('userInfo').innerHTML='🌐 Режим браузера';
-}
-}catch(e){
-console.log(e);
-}
+    // ПЕРВЫЙ СКЛАД
+    if(document.getElementById('picks').children.length===0){
+        addPick();
+    }
 
 });
 
