@@ -307,27 +307,18 @@ style="width:auto;">
 
 const tg = window.Telegram.WebApp;
 
-// раскрыть на весь экран
 tg.expand();
 
-// готовность приложения
 tg.ready();
 
-// пользователь
 const user = tg.initDataUnsafe.user;
-    if(user){
+if(user){
 
-    document.getElementById('userInfo').innerHTML=`
+    document.getElementById('userInfo').innerHTML = `
     👋 ${user.first_name}
-
-    ${user.username
-        ? '@'+user.username
-        : ''
-    }
+    ${user.username ? '@'+user.username : ''}
     `;
 }
-
-console.log(user);
 // НАСТРОЙКИ
 let settings = JSON.parse(localStorage.getItem('settings')) || {
 
