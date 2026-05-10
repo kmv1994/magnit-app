@@ -1,175 +1,135 @@
-# Полный index.html (восстановленная стабильная версия)
-
-```html
 <!DOCTYPE html>
+
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Зарплата Магнит</title>
+<title>Магнит — Зарплата</title>
 
 <style>
 body{
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:#f5f5f5;
+margin:0;
+font-family:Arial,sans-serif;
+background:#f3f3f3;
+color:#111;
 }
-
 .header{
-    background:#e30613;
-    color:white;
-    text-align:center;
-    padding:16px;
-    font-size:20px;
-    font-weight:bold;
-    box-shadow:0 2px 6px rgba(0,0,0,0.2);
+background:#e30613;
+color:#fff;
+padding:18px;
+text-align:center;
+font-size:24px;
+font-weight:bold;
 }
-
+#userInfo{
+background:#fff;
+padding:10px;
+text-align:center;
+border-bottom:1px solid #ddd;
+}
 .page{
-    padding:16px;
-    padding-bottom:100px;
+padding:15px;
+padding-bottom:90px;
 }
-
-.hidden{
-    display:none;
+.hidden{display:none;}
+.card{
+background:#fff;
+padding:15px;
+border-radius:18px;
+margin-bottom:15px;
+box-shadow:0 2px 8px rgba(0,0,0,.08);
 }
-
-.block{
-    background:white;
-    border-radius:16px;
-    padding:16px;
-    margin-bottom:14px;
-    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+input,select,button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border-radius:12px;
+border:1px solid #ddd;
+box-sizing:border-box;
+font-size:16px;
+-webkit-appearance:auto;
+appearance:auto;
+background:#fff;
 }
-
-input,select{
-    width:100%;
-    padding:12px;
-    margin:8px 0;
-    border-radius:10px;
-    border:1px solid #ddd;
-    box-sizing:border-box;
-    font-size:16px;
-    background:white;
-    color:#111;
-    -webkit-appearance:auto;
-    appearance:auto;
-    position:relative;
-    z-index:1;
-}
-
 button{
-    border:none;
-    border-radius:12px;
-    padding:12px;
-    background:#e30613;
-    color:white;
-    font-weight:bold;
-    cursor:pointer;
-    margin-top:8px;
+background:#e30613;
+color:#fff;
+border:none;
+font-weight:bold;
 }
-
-.btn-secondary{
-    background:#eee;
-    color:#333;
+.secondary{
+background:#ececec;
+color:#111;
 }
-
-.result{
-    background:#f1f8e9;
-    padding:14px;
-    border-radius:12px;
-    line-height:1.6;
-}
-
 .bottom-nav{
-    position:fixed;
-    bottom:0;
-    left:0;
-    width:100%;
-    display:flex;
-    background:white;
-    border-top:1px solid #ddd;
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+display:flex;
+background:#fff;
+border-top:1px solid #ddd;
 }
-
 .bottom-nav button{
-    flex:1;
-    border-radius:0;
-    background:none;
-    color:#666;
+flex:1;
+background:#fff;
+color:#666;
+border:none;
+border-radius:0;
+font-size:22px;
 }
-
-.bottom-nav button.active{
-    color:#e30613;
-    font-weight:bold;
+.bottom-nav .active{
+color:#e30613;
+font-weight:bold;
 }
-
+.day.work{background:#d4edda;}
+.day.off{background:#f8d7da;}
 .day{
-    padding:10px;
-    border-radius:10px;
-    margin-bottom:6px;
-    cursor:pointer;
-}
-
-.work{
-    background:#c8e6c9;
-}
-
-.off{
-    background:#ffcdd2;
+padding:10px;
+border-radius:12px;
+margin-top:8px;
 }
 </style>
+
 </head>
 <body>
 
-<div class="header">
-📦 Зарплата кладовщика / отборщика Магнит
-</div>
+<div class="header">📦 Зарплата кладовщика / отборщика Магнит</div>
+<div id="userInfo">Загрузка пользователя...</div>
 
-<div id="userInfo"
-style="background:white;padding:10px;text-align:center;font-size:14px;border-bottom:1px solid #ddd;">
-Загрузка пользователя...
-</div>
-
-<!-- КАЛЬКУЛЯТОР -->
 <div id="calc" class="page">
 
-<div class="block">
+<div class="card">
 <input type="date" id="date">
-
 <input type="number" id="hours" placeholder="Количество часов">
-
-<label style="display:flex;align-items:center;gap:10px;">
+<label>
 <input type="checkbox" id="holiday" style="width:auto;">
 🎉 Праздничный день (часы ×2)
 </label>
 </div>
 
-<div class="block">
+<div class="card">
 <h3>📦 Пики</h3>
 <div id="picks"></div>
 <button onclick="addPick()">Добавить склад</button>
 </div>
 
-<div class="block">
+<div class="card">
 <h3>🚛 Развоз телег</h3>
 <input type="number" id="carts" placeholder="Количество телег">
 </div>
 
-<div style="display:flex;gap:10px;">
-<button style="flex:1;" onclick="calculate()">Рассчитать</button>
-<button style="flex:1;" class="btn-secondary" onclick="saveDay()">Сохранить</button>
+<div class="card">
+<button onclick="calculate()">Рассчитать</button>
+<button class="secondary" onclick="saveDay()">Сохранить</button>
 </div>
 
-<div id="result" class="result"></div>
-
+<div class="card" id="result"></div>
 </div>
 
-<!-- ОТЧЕТЫ -->
 <div id="reports" class="page hidden">
-
-<div class="block">
+<div class="card">
 <select id="yearSelect"></select>
-
 <select id="monthSelect">
 <option value="0">Январь</option>
 <option value="1">Февраль</option>
@@ -184,33 +144,31 @@ style="background:white;padding:10px;text-align:center;font-size:14px;border-bot
 <option value="10">Ноябрь</option>
 <option value="11">Декабрь</option>
 </select>
-
 <button onclick="loadReports()">Показать отчет</button>
+<button onclick="exportExcel()">📥 Excel</button>
 </div>
 
 <div id="reportList"></div>
 
-<div class="block">
+<div class="card">
 <h3>📊 МЕСЯЧНЫЙ ИТОГ</h3>
 <div id="summary"></div>
 </div>
 
+<div class="card">
+<h3>📈 ПРОГНОЗ</h3>
+<div id="forecast"></div>
+</div>
 </div>
 
-<!-- КАЛЕНДАРЬ -->
 <div id="calendar" class="page hidden">
-
-<div class="block">
-<h3>📅 Настройка графика</h3>
+<div class="card">
 <input type="date" id="startDate">
 <button onclick="generateCalendar()">Создать график 2/2</button>
 </div>
 
-<div class="block">
-<h3>🔎 Показать период</h3>
-
+<div class="card">
 <select id="calendarYear"></select>
-
 <select id="calendarMonth">
 <option value="0">Январь</option>
 <option value="1">Февраль</option>
@@ -225,17 +183,14 @@ style="background:white;padding:10px;text-align:center;font-size:14px;border-bot
 <option value="10">Ноябрь</option>
 <option value="11">Декабрь</option>
 </select>
-
 <button onclick="renderCalendar()">Показать</button>
 </div>
 
 <div id="calendarList"></div>
 </div>
 
-<!-- НАСТРОЙКИ -->
 <div id="settings" class="page hidden">
-
-<div class="block">
+<div class="card">
 <h3>⏱ Почасовая ставка</h3>
 <input type="number" id="set_hourRate">
 
@@ -246,15 +201,9 @@ style="background:white;padding:10px;text-align:center;font-size:14px;border-bot
 <input type="number" id="set_ndfl" step="0.01">
 </div>
 
-<div class="block">
+<div class="card">
 <h3>📦 Тарифы складов</h3>
 <div id="ratesList"></div>
-
-<div style="margin-top:12px;font-size:13px;color:#666;line-height:1.5;">
-⏱ Почасовая ставка — оплата за 1 час работы<br>
-🚛 Стоимость телеги — оплата за 1 телегу<br>
-💰 НДФЛ — налог (например 0.13 = 13%)
-</div>
 </div>
 
 <button onclick="saveSettings()">Сохранить настройки</button>
@@ -262,7 +211,7 @@ style="background:white;padding:10px;text-align:center;font-size:14px;border-bot
 </div>
 
 <div class="bottom-nav">
-<button onclick="nav('calc',this)" class="active">💰</button>
+<button class="active" onclick="nav('calc',this)">💰</button>
 <button onclick="nav('reports',this)">📊</button>
 <button onclick="nav('calendar',this)">📅</button>
 <button onclick="nav('settings',this)">⚙️</button>
@@ -271,418 +220,341 @@ style="background:white;padding:10px;text-align:center;font-size:14px;border-bot
 <script>
 
 let settings=JSON.parse(localStorage.getItem('settings')) || {
-    hourRate:150,
-    cartRate:100,
-    ndfl:0.13,
-    rates:{
-        "ОС":2.25,
-        "Мультиотборка ОС":1.78,
-        "Охлажденка":1.37,
-        "Мультиотборка охлажденка":1.49,
-        "Заморозка":1.72,
-        "Мультиотборка заморозка":2.08,
-        "Овощи/фрукты":1.86,
-        "Мультиотборка овощи/фрукты":1.52,
-        "Алкоголь":2.38,
-        "Мультиотборка алкоголь":2.06
-    }
+hourRate:140,
+cartRate:9,
+ndfl:0.13,
+rates:{
+"ОС":2.25,
+"Мультиотборка ОС":1.78,
+"Охлажденка":1.37,
+"Мультиотборка охлажденка":1.49,
+"Заморозка":1.72,
+"Мультиотборка заморозка":2.08,
+"Овощи/фрукты":1.86,
+"Мультиотборка овощи/фрукты":1.52,
+"Алкоголь":2.38,
+"Мультиотборка алкоголь":2.06
+}
 };
 
 function nav(id,btn){
-
-    document.querySelectorAll('.page').forEach(p=>{
-        p.classList.add('hidden');
-    });
-
-    document.getElementById(id).classList.remove('hidden');
-
-    document.querySelectorAll('.bottom-nav button').forEach(b=>{
-        b.classList.remove('active');
-    });
-
-    btn.classList.add('active');
-
-    if(id==='settings'){
-        openSettings();
-    }
+document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+document.getElementById(id).classList.remove('hidden');
+document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.remove('active'));
+btn.classList.add('active');
+if(id==='settings') openSettings();
 }
 
 function addPick(){
+let div=document.createElement('div');
+let options='';
+Object.keys(settings.rates).forEach(k=>{
+options+=`<option value="${k}">${k}</option>`;
+});
 
-    let div=document.createElement('div');
+div.innerHTML=`
+<select class="pickType">${options}</select>
+<input type="number" class="pickQty" placeholder="Количество пиков">
+<button class="secondary" onclick="this.parentElement.remove()">Удалить склад</button>
+`;
 
-    div.style.marginBottom='12px';
-    div.style.padding='10px';
-    div.style.border='1px solid #eee';
-    div.style.borderRadius='10px';
-
-    let options='';
-
-    Object.keys(settings.rates).forEach(k=>{
-        options += `<option value="${k}">${k}</option>`;
-    });
-
-    div.innerHTML=`
-    <select class="pickType">
-        ${options}
-    </select>
-
-    <input
-        type="number"
-        class="pickQty"
-        placeholder="Количество пиков"
-    >
-
-    <button
-        type="button"
-        class="btn-secondary"
-        onclick="this.parentElement.remove()"
-    >
-    Удалить склад
-    </button>
-    `;
-
-    document.getElementById('picks').appendChild(div);
+document.getElementById('picks').appendChild(div);
 }
 
-
 function calculate(){
+let date=document.getElementById('date').value;
+let hours=+document.getElementById('hours').value||0;
+let carts=+document.getElementById('carts').value||0;
+let holiday=document.getElementById('holiday').checked;
 
-    let date=document.getElementById('date').value;
+let calendar=JSON.parse(localStorage.getItem('calendar'))||[];
+let found=calendar.find(d=>d.date===date);
 
-    let calendar=JSON.parse(localStorage.getItem('calendar')) || [];
+if(found && found.type==='off'){
+alert('Это выходной день');
+return;
+}
 
-    let day=calendar.find(d=>d.date===date);
+let picks=[];
+let html='';
+let pickTotal=0;
 
-    if(day && day.type==='off'){
-        alert('❌ Это выходной день');
-        return;
-    }
+let hourRate=holiday?settings.hourRate*2:settings.hourRate;
+let hourSum=hours*hourRate;
+let cartSum=carts*settings.cartRate;
 
-    let hours=+document.getElementById('hours').value || 0;
-    let carts=+document.getElementById('carts').value || 0;
-    let holiday=document.getElementById('holiday').checked;
+document.querySelectorAll('#picks > div').forEach(div=>{
+let type=div.querySelector('.pickType').value;
+let qty=+div.querySelector('.pickQty').value||0;
+let sum=qty*settings.rates[type];
 
-    let hourRate=holiday ? settings.hourRate*2 : settings.hourRate;
+pickTotal+=sum;
 
-    let hourSum=hours*hourRate;
-    let cartSum=carts*settings.cartRate;
+picks.push({type,qty,sum});
 
-    let picks=[];
-    let html='';
+html+=`${type} (${qty}) — ${sum.toFixed(2)} руб<br>`;
+});
 
-    document.querySelectorAll('#picks div').forEach(div=>{
+let total=pickTotal+hourSum+cartSum;
+let final=total-(total*settings.ndfl);
 
-        let type=div.querySelector('select').value;
-        let qty=+div.querySelector('input').value || 0;
+html+=`
+🚛 Телеги (${carts}) — ${cartSum.toFixed(2)} руб<br>
+⏱ Часы (${hours}) — ${hourSum.toFixed(2)} руб<br>
+<hr>
+💰 Итого до НДФЛ: ${total.toFixed(2)} руб<br>
+✅ Итого после НДФЛ: ${final.toFixed(2)} руб
+`;
 
-        let sum=qty*settings.rates[type];
+document.getElementById('result').innerHTML=html;
 
-        picks.push({type,qty,sum});
-
-        html += `${type} (${qty}) — ${sum.toFixed(2)} руб<br>`;
-    });
-
-    let pickTotal=picks.reduce((a,b)=>a+b.sum,0);
-
-    let total=pickTotal+cartSum+hourSum;
-
-    let final=total-(total*settings.ndfl);
-
-    html += `
-    🚛 Телеги (${carts}) — ${cartSum.toFixed(2)} руб<br>
-    ⏱ Часы (${hours}) ${holiday ? '(праздничный день ×2)' : ''} — ${hourSum.toFixed(2)} руб<br>
-    <hr>
-    💰 Итого до НДФЛ: ${total.toFixed(2)} руб<br>
-    ✅ Итого после НДФЛ: ${final.toFixed(2)} руб
-    `;
-
-    document.getElementById('result').innerHTML=html;
-
-    return {
-        date,
-        hours,
-        carts,
-        picks,
-        total,
-        final,
-        holiday
-    };
+return {date,hours,carts,picks,total,final,holiday};
 }
 
 function saveDay(){
-
-    let d=calculate();
-
-    if(!d) return;
-
-    let arr=JSON.parse(localStorage.getItem('days')) || [];
-
-    arr.push(d);
-
-    localStorage.setItem('days',JSON.stringify(arr));
-
-    alert('Сохранено');
+let d=calculate();
+if(!d)return;
+let arr=JSON.parse(localStorage.getItem('days'))||[];
+arr.push(d);
+localStorage.setItem('days',JSON.stringify(arr));
+alert('Сохранено');
 }
 
 function deleteDay(index){
-
-    let arr=JSON.parse(localStorage.getItem('days')) || [];
-
-    arr.splice(index,1);
-
-    localStorage.setItem('days',JSON.stringify(arr));
-
-    loadReports();
+let arr=JSON.parse(localStorage.getItem('days'))||[];
+arr.splice(index,1);
+localStorage.setItem('days',JSON.stringify(arr));
+loadReports();
 }
 
 function loadReports(){
+let data=JSON.parse(localStorage.getItem('days'))||[];
+let year=+document.getElementById('yearSelect').value;
+let month=+document.getElementById('monthSelect').value;
 
-    let data=JSON.parse(localStorage.getItem('days')) || [];
+let html='';
+let totalAfter=0;
+let totalBefore=0;
+let totalHours=0;
+let totalCarts=0;
+let warehouseTotals={};
 
-    let year=+document.getElementById('yearSelect').value;
-    let month=+document.getElementById('monthSelect').value;
+let workedDays=0;
 
-    let html='';
+data.forEach((d,i)=>{
+let dt=new Date(d.date);
+if(dt.getFullYear()!==year||dt.getMonth()!==month)return;
 
-    let totalAfter=0;
+workedDays++;
 
-    data.forEach((d,i)=>{
+totalAfter+=d.final;
+totalBefore+=d.total;
+totalHours+=d.hours;
+totalCarts+=d.carts;
 
-        let dd=new Date(d.date);
+html+=`<div class="card"><b>${d.date}</b><br><br>`;
 
-        if(dd.getFullYear()!==year || dd.getMonth()!==month) return;
+d.picks.forEach(p=>{
+html+=`${p.type} (${p.qty}) — ${p.sum.toFixed(2)} руб<br>`;
 
-        html += `<div class="block">`;
+if(!warehouseTotals[p.type]){
+warehouseTotals[p.type]={qty:0,sum:0};
+}
+warehouseTotals[p.type].qty+=p.qty;
+warehouseTotals[p.type].sum+=p.sum;
+});
 
-        html += `<b>${d.date}</b><br><br>`;
+html+=`
+🚛 Телеги (${d.carts}) — ${(d.carts*settings.cartRate).toFixed(2)} руб<br>
+⏱ Часы (${d.hours}) — ${(d.hours*settings.hourRate).toFixed(2)} руб<br>
+<hr>
+💰 Итого до НДФЛ: ${d.total.toFixed(2)} руб<br>
+✅ Итого после НДФЛ: ${d.final.toFixed(2)} руб
+<button class="secondary" onclick="deleteDay(${i})">Удалить день</button>
+</div>`;
+});
 
-        d.picks.forEach(p=>{
-            html += `${p.type} (${p.qty}) — ${p.sum.toFixed(2)} руб<br>`;
-        });
+document.getElementById('reportList').innerHTML=html;
 
-        let cartSum=d.carts*settings.cartRate;
+let summary='';
 
-        let hourRate=d.holiday ? settings.hourRate*2 : settings.hourRate;
+for(let k in warehouseTotals){
+summary+=`${k} (${warehouseTotals[k].qty}) — ${warehouseTotals[k].sum.toFixed(2)} руб<br>`;
+}
 
-        let hourSum=d.hours*hourRate;
+summary+=`
+<br>
+🚛 Телеги (${totalCarts}) — ${(totalCarts*settings.cartRate).toFixed(2)} руб<br>
+⏱ Часы (${totalHours}) — ${(totalHours*settings.hourRate).toFixed(2)} руб<br>
+<hr>
+💰 Итого до НДФЛ: ${totalBefore.toFixed(2)} руб<br>
+✅ Итого после НДФЛ: ${totalAfter.toFixed(2)} руб
+`;
 
-        html += `
-        🚛 Телеги (${d.carts}) — ${cartSum.toFixed(2)} руб<br>
-        ⏱ Часы (${d.hours}) ${d.holiday ? '(праздничный день ×2)' : ''} — ${hourSum.toFixed(2)} руб<br>
-        <hr>
-        💰 Итого до НДФЛ: ${d.total.toFixed(2)} руб<br>
-        ✅ Итого после НДФЛ: ${d.final.toFixed(2)} руб
-        `;
+document.getElementById('summary').innerHTML=summary;
 
-        html += `
-        <button class="btn-secondary" onclick="deleteDay(${i})">
-        Удалить день
-        </button>
-        `;
+let calendar=JSON.parse(localStorage.getItem('calendar'))||[];
 
-        html += `</div>`;
+let workDays=calendar.filter(d=>{
+let dt=new Date(d.date);
+return dt.getFullYear()===year && dt.getMonth()===month && d.type==='work';
+}).length;
 
-        totalAfter += d.final;
-    });
+let avg=workedDays?totalAfter/workedDays:0;
+let forecast=avg*workDays;
 
-    document.getElementById('reportList').innerHTML=html;
-
-    document.getElementById('summary').innerHTML=`
-    💰 Общий доход после НДФЛ: ${totalAfter.toFixed(2)} руб
-    `;
+document.getElementById('forecast').innerHTML=`
+Средний заработок за смену: ${avg.toFixed(2)} руб<br>
+Рабочих дней по графику: ${workDays}<br>
+Прогноз зарплаты: ${forecast.toFixed(2)} руб
+`;
 }
 
 function generateCalendar(){
+let start=document.getElementById('startDate').value;
+if(!start)return;
 
-    let startValue=document.getElementById('startDate').value;
+let base=new Date(start);
+let arr=[];
 
-    if(!startValue){
-        alert('Выберите дату');
-        return;
-    }
+for(let i=0;i<3650;i++){
+let d=new Date(base);
+d.setDate(base.getDate()+i);
 
-    let start=new Date(startValue);
+let type=(Math.floor(i/2)%2===0)?'work':'off';
 
-    let days=[];
+arr.push({
+date:d.toISOString().split('T')[0],
+type
+});
+}
 
-    for(let i=0;i<3650;i++){
-
-        let d=new Date(start);
-
-        d.setDate(start.getDate()+i);
-
-        let type=(Math.floor(i/2)%2===0)
-            ? 'work'
-            : 'off';
-
-        days.push({
-            date:d.toISOString().split('T')[0],
-            type
-        });
-    }
-
-    localStorage.setItem('calendar',JSON.stringify(days));
-
-    renderCalendar();
+localStorage.setItem('calendar',JSON.stringify(arr));
+renderCalendar();
 }
 
 function renderCalendar(){
+let data=JSON.parse(localStorage.getItem('calendar'))||[];
+let year=+document.getElementById('calendarYear').value;
+let month=+document.getElementById('calendarMonth').value;
 
-    let data=JSON.parse(localStorage.getItem('calendar')) || [];
+let html='';
 
-    let year=+document.getElementById('calendarYear').value;
-    let month=+document.getElementById('calendarMonth').value;
+data.forEach((d,i)=>{
+let dt=new Date(d.date);
+if(dt.getFullYear()!==year||dt.getMonth()!==month)return;
 
-    let html='';
+html+=`<div class="day ${d.type}" onclick="toggleDay(${i})">
+<b>${d.date}</b><br>
+${d.type==='work'?'🟢 Рабочий':'🔴 Выходной'}
+</div>`;
+});
 
-    data.forEach((d,i)=>{
-
-        let current=new Date(d.date);
-
-        if(current.getFullYear()!==year || current.getMonth()!==month) return;
-
-        html += `
-        <div class="day ${d.type}" onclick="toggleDay(${i})">
-        <b>${d.date}</b><br>
-        ${d.type==='work' ? '🟢 Рабочий день' : '🔴 Выходной'}
-        </div>
-        `;
-    });
-
-    document.getElementById('calendarList').innerHTML=html;
+document.getElementById('calendarList').innerHTML=html;
 }
 
 function toggleDay(i){
-
-    let data=JSON.parse(localStorage.getItem('calendar')) || [];
-
-    data[i].type=data[i].type==='work' ? 'off' : 'work';
-
-    localStorage.setItem('calendar',JSON.stringify(data));
-
-    renderCalendar();
+let data=JSON.parse(localStorage.getItem('calendar'))||[];
+data[i].type=data[i].type==='work'?'off':'work';
+localStorage.setItem('calendar',JSON.stringify(data));
+renderCalendar();
 }
 
 function openSettings(){
+document.getElementById('set_hourRate').value=settings.hourRate;
+document.getElementById('set_cartRate').value=settings.cartRate;
+document.getElementById('set_ndfl').value=settings.ndfl;
 
-    document.getElementById('set_hourRate').value=settings.hourRate;
-    document.getElementById('set_cartRate').value=settings.cartRate;
-    document.getElementById('set_ndfl').value=settings.ndfl;
+let html='';
 
-    let html='';
+for(let k in settings.rates){
+html+=`${k}<input data-type="${k}" value="${settings.rates[k]}">`;
+}
 
-    for(let k in settings.rates){
-
-        html += `
-        ${k}
-        <input data-type="${k}" value="${settings.rates[k]}">
-        `;
-    }
-
-    document.getElementById('ratesList').innerHTML=html;
+document.getElementById('ratesList').innerHTML=html;
 }
 
 function saveSettings(){
+settings.hourRate=+document.getElementById('set_hourRate').value;
+settings.cartRate=+document.getElementById('set_cartRate').value;
+settings.ndfl=+document.getElementById('set_ndfl').value;
 
-    settings.hourRate=+document.getElementById('set_hourRate').value;
-    settings.cartRate=+document.getElementById('set_cartRate').value;
-    settings.ndfl=+document.getElementById('set_ndfl').value;
+document.querySelectorAll('#ratesList input').forEach(i=>{
+settings.rates[i.dataset.type]=+i.value;
+});
 
-    document.querySelectorAll('#ratesList input').forEach(i=>{
-        settings.rates[i.dataset.type]=+i.value;
-    });
+localStorage.setItem('settings',JSON.stringify(settings));
+alert('Сохранено');
+}
 
-    localStorage.setItem('settings',JSON.stringify(settings));
+function exportExcel(){
+let data=JSON.parse(localStorage.getItem('days'))||[];
+let csv='Дата;Тип;Количество;Сумма\n';
 
-    alert('Настройки сохранены');
+data.forEach(d=>{
+
+d.picks.forEach(p=>{
+csv+=`${d.date};${p.type};${p.qty};${p.sum.toFixed(2)}\n`;
+});
+
+csv+=`${d.date};Телеги;${d.carts};${(d.carts*settings.cartRate).toFixed(2)}\n`;
+csv+=`${d.date};Часы;${d.hours};${(d.hours*settings.hourRate).toFixed(2)}\n`;
+csv+=`${d.date};ИТОГО ДО НДФЛ;;${d.total.toFixed(2)}\n`;
+csv+=`${d.date};ИТОГО ПОСЛЕ НДФЛ;;${d.final.toFixed(2)}\n`;
+});
+
+let blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+let link=document.createElement('a');
+link.href=URL.createObjectURL(blob);
+link.download='report.csv';
+link.click();
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
 
-    // ДОБАВЛЯЕМ ПЕРВЫЙ СКЛАД
-    if(document.getElementById('picks').children.length===0){
-        addPick();
-    }
+addPick();
 
-    // ГОДА ОТЧЕТА
-    const yearSelect=document.getElementById('yearSelect');
+for(let y=2025;y<=2100;y++){
+let o1=document.createElement('option');
+o1.value=y;
+o1.textContent=y;
+document.getElementById('yearSelect').appendChild(o1);
 
-    yearSelect.innerHTML='';
+let o2=document.createElement('option');
+o2.value=y;
+o2.textContent=y;
+document.getElementById('calendarYear').appendChild(o2);
+}
 
-    for(let y=2025;y<=2100;y++){
+let currentYear=new Date().getFullYear();
+let currentMonth=new Date().getMonth();
 
-        const option=document.createElement('option');
+document.getElementById('yearSelect').value=currentYear;
+document.getElementById('calendarYear').value=currentYear;
+document.getElementById('monthSelect').value=currentMonth;
+document.getElementById('calendarMonth').value=currentMonth;
 
-        option.value=y;
-        option.textContent=y;
+openSettings();
 
-        yearSelect.appendChild(option);
-    }
+try{
+if(window.Telegram && Telegram.WebApp){
+const tg=Telegram.WebApp;
+tg.ready();
+tg.expand();
 
-    yearSelect.value=new Date().getFullYear();
+const user=tg.initDataUnsafe.user;
 
-    // ГОДА КАЛЕНДАРЯ
-    const calendarYear=document.getElementById('calendarYear');
-
-    calendarYear.innerHTML='';
-
-    for(let y=2025;y<=2100;y++){
-
-        const option=document.createElement('option');
-
-        option.value=y;
-        option.textContent=y;
-
-        calendarYear.appendChild(option);
-    }
-
-    calendarYear.value=new Date().getFullYear();
-
-    // ТЕКУЩИЕ МЕСЯЦЫ
-    const currentMonth=new Date().getMonth();
-
-    document.getElementById('monthSelect').value=currentMonth;
-    document.getElementById('calendarMonth').value=currentMonth;
-
-    // ЗАГРУЗКА НАСТРОЕК
-    openSettings();
-
-    // TELEGRAM MINI APP
-    try{
-
-        if(window.Telegram && window.Telegram.WebApp){
-
-            const tg=window.Telegram.WebApp;
-
-            tg.ready();
-            tg.expand();
-
-            const user=tg.initDataUnsafe?.user;
-
-            if(user){
-
-                document.getElementById('userInfo').innerHTML=`
-                👋 ${user.first_name || ''}
-                ${user.username ? '@'+user.username : ''}
-                `;
-
-            }else{
-
-                document.getElementById('userInfo').innerHTML='👤 Telegram пользователь';
-            }
-
-        }else{
-
-            document.getElementById('userInfo').innerHTML='🌐 Режим браузера';
-        }
-
-    }catch(e){
-
-        console.log(e);
-
-        document.getElementById('userInfo').innerHTML='⚠️ Ошибка Telegram API';
-    }
+if(user){
+document.getElementById('userInfo').innerHTML=`👋 ${user.first_name} ${user.username?'@'+user.username:''}`;
+}else{
+document.getElementById('userInfo').innerHTML='👤 Telegram пользователь';
+}
+}else{
+document.getElementById('userInfo').innerHTML='🌐 Режим браузера';
+}
+}catch(e){
+console.log(e);
+}
 
 });
 
@@ -692,4 +564,3 @@ window.addEventListener('DOMContentLoaded',()=>{
 
 </body>
 </html>
-```
