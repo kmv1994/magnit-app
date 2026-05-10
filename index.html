@@ -242,6 +242,12 @@ style="background:white;padding:10px;text-align:center;font-size:14px;border-bot
 <div class="block">
 <h3>📦 Тарифы складов</h3>
 <div id="ratesList"></div>
+
+<div style="margin-top:12px;font-size:13px;color:#666;line-height:1.5;">
+⏱ Почасовая ставка — оплата за 1 час работы<br>
+🚛 Стоимость телеги — оплата за 1 телегу<br>
+💰 НДФЛ — налог (например 0.13 = 13%)
+</div>
 </div>
 
 <button onclick="saveSettings()">Сохранить настройки</button>
@@ -298,22 +304,40 @@ function addPick(){
 
     let div=document.createElement('div');
 
+    div.style.marginBottom='12px';
+    div.style.padding='10px';
+    div.style.border='1px solid #eee';
+    div.style.borderRadius='10px';
+
     let options='';
 
-    for(let k in settings.rates){
-        options += `<option>${k}</option>`;
-    }
+    Object.keys(settings.rates).forEach(k=>{
+        options += `<option value="${k}">${k}</option>`;
+    });
 
     div.innerHTML=`
-    <select>${options}</select>
-    <input type="number" placeholder="Количество пиков">
-    <button class="btn-secondary" onclick="this.parentElement.remove()">
-    Удалить
+    <select class="pickType">
+        ${options}
+    </select>
+
+    <input
+        type="number"
+        class="pickQty"
+        placeholder="Количество пиков"
+    >
+
+    <button
+        type="button"
+        class="btn-secondary"
+        onclick="this.parentElement.remove()"
+    >
+    Удалить склад
     </button>
     `;
 
     document.getElementById('picks').appendChild(div);
 }
+
 
 function calculate(){
 
@@ -569,59 +593,88 @@ function saveSettings(){
 
 window.addEventListener('DOMContentLoaded',()=>{
 
+    // ДОБАВЛЯЕМ ПЕРВЫЙ СКЛАД
     if(document.getElementById('picks').children.length===0){
         addPick();
     }
 
-    let yearSelect=document.getElementById('yearSelect');
+    // ГОДА ОТЧЕТА
+    const yearSelect=document.getElementById('yearSelect');
+
+    yearSelect.innerHTML='';
 
     for(let y=2025;y<=2100;y++){
 
-        let option=document.createElement('option');
+        const option=document.createElement('option');
 
         option.value=y;
-        option.text=y;
+        option.textContent=y;
 
         yearSelect.appendChild(option);
     }
 
     yearSelect.value=new Date().getFullYear();
 
-    let calendarYear=document.getElementById('calendarYear');
+    // ГОДА КАЛЕНДАРЯ
+    const calendarYear=document.getElementById('calendarYear');
+
+    calendarYear.innerHTML='';
 
     for(let y=2025;y<=2100;y++){
 
-        let option=document.createElement('option');
+        const option=document.createElement('option');
 
         option.value=y;
-        option.text=y;
+        option.textContent=y;
 
         calendarYear.appendChild(option);
     }
 
     calendarYear.value=new Date().getFullYear();
 
-    let currentMonth=new Date().getMonth();
+    // ТЕКУЩИЕ МЕСЯЦЫ
+    const currentMonth=new Date().getMonth();
 
     document.getElementById('monthSelect').value=currentMonth;
     document.getElementById('calendarMonth').value=currentMonth;
 
-    // TELEGRAM
-    if(window.Telegram && Telegram.WebApp){
+    // ЗАГРУЗКА НАСТРОЕК
+    openSettings();
 
-        const tg=Telegram.WebApp;
+    // TELEGRAM MINI APP
+    try{
 
-        tg.ready();
-        tg.expand();
+        if(window.Telegram && window.Telegram.WebApp){
 
-        const user=tg.initDataUnsafe.user;
+            const tg=window.Telegram.WebApp;
 
-        if(user){
-            document.getElementById('userInfo').innerHTML=`
-            👋 ${user.first_name}
-            ${user.username ? '@'+user.username : ''}
-            `;
+            tg.ready();
+            tg.expand();
+
+            const user=tg.initDataUnsafe?.user;
+
+            if(user){
+
+                document.getElementById('userInfo').innerHTML=`
+                👋 ${user.first_name || ''}
+                ${user.username ? '@'+user.username : ''}
+                `;
+
+            }else{
+
+                document.getElementById('userInfo').innerHTML='👤 Telegram пользователь';
+            }
+
+        }else{
+
+            document.getElementById('userInfo').innerHTML='🌐 Режим браузера';
         }
+
+    }catch(e){
+
+        console.log(e);
+
+        document.getElementById('userInfo').innerHTML='⚠️ Ошибка Telegram API';
     }
 
 });
