@@ -230,8 +230,8 @@ function loadUserSettings(){
 settings=JSON.parse(
 localStorage.getItem(userKey('settings'))
 ) || {
-hourRate:140,
-cartRate:9,
+hourRate:139,
+cartRate:8,
 ndfl:0.13,
 rates:{
 "ОС":2.25,
@@ -501,26 +501,126 @@ alert('Сохранено');
 }
 
 function exportExcel(){
-let data=JSON.parse(localStorage.getItem(userKey('days')))||[];
-let csv='Дата;Тип;Количество;Сумма\n';
 
-data.forEach(d=>{
+    let data = JSON.parse(
+        localStorage.getItem(
+            userKey('days')
+        )
+    ) || [];
 
-d.picks.forEach(p=>{
-csv+=`${d.date};${p.type};${p.qty};${p.sum.toFixed(2)}\n`;
-});
+    if(data.length===0){
 
-csv+=`${d.date};Телеги;${d.carts};${(d.carts*settings.cartRate).toFixed(2)}\n`;
-csv+=`${d.date};Часы;${d.hours};${(d.hours*settings.hourRate).toFixed(2)}\n`;
-csv+=`${d.date};ИТОГО ДО НДФЛ;;${d.total.toFixed(2)}\n`;
-csv+=`${d.date};ИТОГО ПОСЛЕ НДФЛ;;${d.final.toFixed(2)}\n`;
-});
+        alert('Нет данных для экспорта');
 
-let blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
-let link=document.createElement('a');
-link.href=URL.createObjectURL(blob);
-link.download='report.csv';
-link.click();
+        return;
+    }
+
+    let rows=[];
+
+    data.forEach(d=>{
+
+        d.picks.forEach(p=>{
+
+            rows.push({
+                'Дата': d.date,
+                'Тип': p.type,
+                'Количество': p.qty,
+                'Сумма': Number(p.sum.toFixed(2))
+            });
+
+        });
+
+        rows.push({
+            'Дата': d.date,
+            'Тип': 'Телеги',
+            'Количество': d.carts,
+            'Сумма': Number(
+                (
+                    d.carts *
+                    settings.cartRate
+                ).toFixed(2)
+            )
+        });
+
+        rows.push({
+            'Дата': d.date,
+            'Тип': 'Часы',
+            'Количество': d.hours,
+            'Сумма': Number(
+                (
+                    d.hours *
+                    settings.hourRate
+                ).toFixed(2)
+            )
+        });
+
+        rows.push({
+            'Дата': d.date,
+            'Тип': 'ИТОГО ДО НДФЛ',
+            'Количество': '',
+            'Сумма': Number(
+                d.total.toFixed(2)
+            )
+        });
+
+        rows.push({
+            'Дата': d.date,
+            'Тип': 'ИТОГО ПОСЛЕ НДФЛ',
+            'Количество': '',
+            'Сумма': Number(
+                d.final.toFixed(2)
+            )
+        });
+
+    });
+
+    const worksheet =
+    XLSX.utils.json_to_sheet(rows);
+
+    const workbook =
+    XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(
+        workbook,
+        worksheet,
+        'Отчет'
+    );
+
+    const excelBuffer =
+    XLSX.write(
+        workbook,
+        {
+            bookType:'xlsx',
+            type:'array'
+        }
+    );
+
+    const blob =
+    new Blob(
+        [excelBuffer],
+        {
+            type:
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        }
+    );
+
+    const url =
+    URL.createObjectURL(blob);
+
+    const a =
+    document.createElement('a');
+
+    a.href=url;
+
+    a.download='magnit_report.xlsx';
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
@@ -602,6 +702,8 @@ window.addEventListener('DOMContentLoaded',()=>{
 </script>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 </body>
 </html>
