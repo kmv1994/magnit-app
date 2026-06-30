@@ -1,673 +1,2370 @@
 <!DOCTYPE html>
-
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Магнит — Зарплата</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-body{
-margin:0;
-font-family:Arial,sans-serif;
-background:#f3f3f3;
-color:#111;
+    <title>Зарплата Магнит</title>
+
+    <style>
+        body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f5f5f5;
+
+    width:100%;
+    min-height:100vh;
+
+    overflow-x:hidden;
 }
-.header{
-background:#e30613;
-color:#fff;
-padding:18px;
-text-align:center;
-font-size:24px;
-font-weight:bold;
+
+        .header{
+            background:#e30613;
+            color:white;
+            text-align:center;
+            padding:16px;
+            font-size:20px;
+            font-weight:bold;
+            box-shadow:0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .page{
+    padding:14px;
+
+    padding-bottom:140px;
+
+    width:100%;
+
+    max-width:700px;
+
+    margin:auto;
+
+    box-sizing:border-box;
 }
-#userInfo{
-background:#fff;
-padding:10px;
-text-align:center;
-border-bottom:1px solid #ddd;
+
+        .hidden{
+            display:none;
+        }
+
+        .block{
+    background:white;
+    border-radius:16px;
+    padding:16px;
+    margin-bottom:14px;
+
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+
+    width:100%;
+    box-sizing:border-box;
 }
-.page{
-padding:15px;
-padding-bottom:90px;
-}
-.hidden{display:none;}
-.card{
-background:#fff;
-padding:15px;
-border-radius:18px;
-margin-bottom:15px;
-box-shadow:0 2px 8px rgba(0,0,0,.08);
-}
-input,select,button{
-width:100%;
-padding:12px;
-margin-top:10px;
-border-radius:12px;
-border:1px solid #ddd;
-box-sizing:border-box;
-font-size:16px;
--webkit-appearance:auto;
-appearance:auto;
-background:#fff;
-}
+
+        h3{
+            margin-top:0;
+        }
+
+        input,
+select,
 button{
-background:#e30613;
-color:#fff;
-border:none;
-font-weight:bold;
-}
-.secondary{
-background:#ececec;
-color:#111;
-}
-.bottom-nav{
-position:fixed;
-bottom:0;
-left:0;
-width:100%;
-display:flex;
-background:#fff;
-border-top:1px solid #ddd;
-}
-.bottom-nav button{
-flex:1;
-background:#fff;
-color:#666;
-border:none;
-border-radius:0;
-font-size:22px;
-}
-.bottom-nav .active{
-color:#e30613;
-font-weight:bold;
-}
-.day.work{background:#d4edda;}
-.day.off{background:#f8d7da;}
-.day{
-padding:10px;
-border-radius:12px;
-margin-top:8px;
-}
-</style>
+    width:100%;
+    min-height:48px;
 
+    padding:12px;
+
+    margin:8px 0;
+
+    border-radius:10px;
+
+    border:1px solid #ddd;
+
+    box-sizing:border-box;
+
+    font-size:16px;
+}
+
+        button{
+            border:none;
+            border-radius:12px;
+            padding:12px;
+            margin-top:8px;
+            background:#e30613;
+            color:white;
+            font-weight:bold;
+            cursor:pointer;
+        }
+
+        .btn-secondary{
+            background:#eeeeee;
+            color:#333;
+        }
+
+        .result{
+            background:#e8f5e9;
+            border-radius:12px;
+            padding:14px;
+            line-height:1.6;
+        }
+
+        .day{
+            padding:10px;
+            border-radius:10px;
+            margin:5px 0;
+            cursor:pointer;
+        }
+
+        .work{
+            background:#c8e6c9;
+        }
+
+        .off{
+            background:#ffcdd2;
+        }
+
+        .bottom-nav{
+    position:fixed;
+
+    left:0;
+    right:0;
+    bottom:0;
+
+    display:flex;
+
+    background:white;
+
+    border-top:1px solid #ddd;
+
+    padding-bottom:
+    env(safe-area-inset-bottom);
+
+    z-index:9999;
+
+    min-height:70px;
+
+    box-sizing:border-box;
+}
+
+       .bottom-nav button{
+    flex:1;
+
+    background:none;
+
+    color:#666;
+
+    border-radius:0;
+
+    min-height:65px;
+
+    font-size:22px;
+
+    border:none;
+}
+
+        .bottom-nav button.active{
+            color:#e30613;
+            font-weight:bold;
+        }
+
+        *{
+    box-sizing:border-box;
+}
+
+img{
+    max-width:100%;
+}
+
+@media (max-width:480px){
+
+    .header{
+        font-size:16px;
+        padding:14px;
+    }
+
+    h3{
+        font-size:16px;
+    }
+
+    .block{
+        padding:12px;
+    }
+
+    button{
+        font-size:14px;
+    }
+}
+
+        html{
+    height:100%;
+}
+
+body{
+    min-height:100%;
+    overflow-x:hidden;
+}
+
+.calendar-grid{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:5px;
+}
+
+.calendar-head{
+    text-align:center;
+    font-weight:bold;
+    padding:8px;
+}
+
+.calendar-cell{
+    min-height:55px;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.calendar-work{
+    background:#c8e6c9;
+}
+
+.calendar-extra{
+    background:#bbdefb;
+}
+
+.calendar-off{
+    background:#ffcdd2;
+}
+
+.calendar-empty{
+    background:transparent;
+}
+    </style>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
+
 <body>
 
-<div class="header">📦 Зарплата кладовщика / отборщика Магнит</div>
-<div id="userInfo">Загрузка пользователя...</div>
+<div class="header">
+    📦 Зарплата кладовщика-отборщика Магнит
+</div>
 
+<!-- КАЛЬКУЛЯТОР -->
 <div id="calc" class="page">
 
-<div class="card">
-<input type="date" id="date">
-<input type="number" id="hours" placeholder="Количество часов">
-<label>
-<input type="checkbox" id="holiday" style="width:auto;">
-🎉 Праздничный день (часы ×2)
-</label>
+    <div class="block">
+        <input type="date" id="date">
+        <input type="number" id="hours" placeholder="Количество часов">
+
+        <label style="display:flex;align-items:center;gap:10px;margin-top:10px;">
+            <input type="checkbox" id="holiday"
+                   style="width:auto;">
+            🎉 Праздничный день (часы ×2)
+        </label>
+    </div>
+
+    <div class="block">
+        <h3>📦 Пики</h3>
+
+        <div id="picks"></div>
+
+        <button onclick="addPick()">Добавить склад</button>
+    </div>
+
+    <div class="block">
+        <h3>🚛 Развоз телег</h3>
+
+        <input type="number" id="carts" placeholder="Количество телег">
+    </div>
+
+    <div style="display:flex; gap:10px;">
+        <button style="flex:1;" onclick="calculate()">Рассчитать</button>
+        <button style="flex:1;" class="btn-secondary" onclick="saveDay()">Сохранить</button>
+    </div>
+
+    <div id="result" class="result"></div>
+
 </div>
 
-<div class="card">
-<h3>📦 Пики</h3>
-<div id="picks"></div>
-<button onclick="addPick()">Добавить склад</button>
-</div>
-
-<div class="card">
-<h3>🚛 Развоз телег</h3>
-<input type="number" id="carts" placeholder="Количество телег">
-</div>
-
-<div class="card">
-<button onclick="calculate()">Рассчитать</button>
-<button class="secondary" onclick="saveDay()">Сохранить</button>
-</div>
-
-<div class="card" id="result"></div>
-</div>
-
+<!-- ОТЧЕТЫ -->
 <div id="reports" class="page hidden">
-<div class="card">
-<select id="yearSelect"></select>
-<select id="monthSelect">
-<option value="0">Январь</option>
-<option value="1">Февраль</option>
-<option value="2">Март</option>
-<option value="3">Апрель</option>
-<option value="4">Май</option>
-<option value="5">Июнь</option>
-<option value="6">Июль</option>
-<option value="7">Август</option>
-<option value="8">Сентябрь</option>
-<option value="9">Октябрь</option>
-<option value="10">Ноябрь</option>
-<option value="11">Декабрь</option>
-</select>
-<button onclick="loadReports()">Показать отчет</button>
-<button onclick="exportExcel()">📥 Excel</button>
+
+    <div class="block">
+
+        <select id="yearSelect"></select>
+
+        <select id="monthSelect">
+            <option value="0">Январь</option>
+            <option value="1">Февраль</option>
+            <option value="2">Март</option>
+            <option value="3">Апрель</option>
+            <option value="4">Май</option>
+            <option value="5">Июнь</option>
+            <option value="6">Июль</option>
+            <option value="7">Август</option>
+            <option value="8">Сентябрь</option>
+            <option value="9">Октябрь</option>
+            <option value="10">Ноябрь</option>
+            <option value="11">Декабрь</option>
+        </select>
+
+        <button onclick="loadReports()">Показать отчет</button>
+
+        <div class="block">
+
+            <h3>🗑 Очистка дня</h3>
+
+            <select id="deleteDate"></select>
+
+            <button
+                    style="
+background:#ef4444;
+color:white;
+width:100%;
+margin-top:10px;
+"
+                    onclick="clearSelectedDay()">
+
+                ❌ Очистить день
+
+            </button>
+
+        </div>
+
+        <button onclick="exportCSV()">
+            📋 Скопировать отчёт (для Google Таблиц)
+        </button>
+        
+        <button onclick="openReportPage()" style="background:#1565c0;">
+            📄 Открыть отчёт
+        </button>
+
+        <div id="csvResult" style="display:none; margin-top:12px; border-radius:12px; overflow:hidden;">
+
+            <div style="background:#2e7d32; color:white; padding:12px 16px; font-weight:bold; font-size:15px;">
+                ✅ Данные скопированы в буфер обмена!
+            </div>
+
+            <div style="background:#e8f5e9; padding:14px; font-size:14px; line-height:1.7; color:#1b5e20;">
+                <b>Как вставить в Google Таблицы:</b><br>
+                1. Откройте <b>Google Таблицы</b> (sheets.google.com)<br>
+                2. Нажмите на ячейку <b>A1</b><br>
+                3. Зажмите и выберите <b>«Вставить»</b><br>
+                4. Готово — данные появятся с разбивкой по столбцам
+            </div>
+
+            <div style="background:#fff3e0; padding:12px 16px; font-size:13px; color:#e65100;">
+                ⚠️ Если буфер не сработал — нажмите кнопку ещё раз или скопируйте текст вручную из поля ниже
+            </div>
+
+            <textarea id="csvText" style="width:100%; height:120px; font-size:12px; font-family:monospace; border:1px solid #ccc; border-radius:0 0 12px 12px; padding:10px; box-sizing:border-box; background:#fafafa; resize:vertical;" readonly></textarea>
+        </div>
+
+    </div>
+
+    <!-- ГРАФИКИ -->
+    <div class="block">
+        <h3>📈 Графики за месяц</h3>
+
+        <div style="display:flex; gap:8px; margin-bottom:14px;">
+            <button onclick="showChartTab('money')" id="chartTabMoney"
+                style="flex:1; margin:0; padding:10px; background:#e30613; color:white; border:none; border-radius:10px; font-weight:bold; font-size:13px;">
+                💰 Деньги
+            </button>
+            <button onclick="showChartTab('picks')" id="chartTabPicks"
+                style="flex:1; margin:0; padding:10px; background:#e0e0e0; color:#333; border:none; border-radius:10px; font-weight:bold; font-size:13px;">
+                📦 Пики
+            </button>
+        </div>
+
+        <div id="chartMoneyWrap">
+            <canvas id="chartMoney" height="220"></canvas>
+        </div>
+
+        <div id="chartPicksWrap" style="display:none;">
+            <canvas id="chartPicksByDay" height="220"></canvas>
+            <div style="margin-top:18px;">
+                <canvas id="chartPicksByType" height="220"></canvas>
+            </div>
+        </div>
+
+        <div id="chartEmptyState" style="display:none; text-align:center; padding:30px; color:#999;">
+            📭 Нет данных за этот месяц для графика
+        </div>
+    </div>
+
+    <div id="reportList"></div>
+
+    <div class="block">
+        <h3>📊 МЕСЯЧНЫЙ ИТОГ</h3>
+
+        <div id="summary"></div>
+    </div>
+
 </div>
 
-<div id="reportList"></div>
 
-<div class="card">
-<h3>📊 МЕСЯЧНЫЙ ИТОГ</h3>
-<div id="summary"></div>
-</div>
-
-<div class="card">
-<h3>📈 ПРОГНОЗ</h3>
-<div id="forecast"></div>
-</div>
-</div>
-
+<!-- КАЛЕНДАРЬ -->
 <div id="calendar" class="page hidden">
-<div class="card">
-<input type="date" id="startDate">
-<button onclick="generateCalendar()">Создать график 2/2</button>
-</div>
 
-<div class="card">
-<select id="calendarYear"></select>
-<select id="calendarMonth">
-<option value="0">Январь</option>
-<option value="1">Февраль</option>
-<option value="2">Март</option>
-<option value="3">Апрель</option>
-<option value="4">Май</option>
-<option value="5">Июнь</option>
-<option value="6">Июль</option>
-<option value="7">Август</option>
-<option value="8">Сентябрь</option>
-<option value="9">Октябрь</option>
-<option value="10">Ноябрь</option>
-<option value="11">Декабрь</option>
-</select>
-<button onclick="renderCalendar()">Показать</button>
-</div>
+    <div class="block">
 
-<div id="calendarList"></div>
-</div>
+        <h3>📅 Настройка графика</h3>
 
+        <input type="date" id="startDate">
+
+        <button onclick="generateCalendar()">
+            Создать график 2/2
+        </button>
+
+    </div>
+
+    <div class="block">
+
+        <h3>🔎 Показать период</h3>
+
+        <select id="calendarYear"></select>
+
+        <select id="calendarMonth">
+            <option value="0">Январь</option>
+            <option value="1">Февраль</option>
+            <option value="2">Март</option>
+            <option value="3">Апрель</option>
+            <option value="4">Май</option>
+            <option value="5">Июнь</option>
+            <option value="6">Июль</option>
+            <option value="7">Август</option>
+            <option value="8">Сентябрь</option>
+            <option value="9">Октябрь</option>
+            <option value="10">Ноябрь</option>
+            <option value="11">Декабрь</option>
+        </select>
+
+        <button onclick="renderCalendar()">
+            Показать
+        </button>
+
+    </div>
+
+    <div id="calendarList"></div>
+
+</div>
+<!-- НАСТРОЙКИ -->
 <div id="settings" class="page hidden">
-<div class="card">
-<h3>⏱ Почасовая ставка</h3>
-<input type="number" id="set_hourRate">
 
-<h3>🚛 Стоимость телеги</h3>
-<input type="number" id="set_cartRate">
+    <div class="block">
 
-<h3>💰 НДФЛ</h3>
-<input type="number" id="set_ndfl" step="0.01">
+        <h3>⏱ Почасовая ставка</h3>
+        <input type="number" id="set_hourRate">
+
+        <h3>🚛 Стоимость телеги</h3>
+        <input type="number" id="set_cartRate">
+
+        <h3>💰 НДФЛ</h3>
+        <input type="number" id="set_ndfl" step="0.01">
+
+    </div>
+
+    <div class="block">
+
+        <h3>📦 Тарифы складов</h3>
+
+        <div id="ratesList"></div>
+
+    </div>
+
+    <button onclick="saveSettings()">
+        Сохранить настройки
+    </button>
+
 </div>
 
-<div class="card">
-<h3>📦 Тарифы складов</h3>
-<div id="ratesList"></div>
+
+<!-- СТРАНИЦА ОТЧЁТА -->
+<div id="reportPage" class="page hidden" style="padding-bottom:20px;">
+
+    <div style="position:sticky;top:0;z-index:100;background:#e30613;padding:12px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 6px rgba(0,0,0,.2);">
+        <button onclick="closeReportPage()" style="background:rgba(255,255,255,.2);color:white;border:none;border-radius:10px;padding:8px 14px;font-size:22px;min-height:auto;width:auto;margin:0;cursor:pointer;">←</button>
+        <span id="reportPageTitle" style="color:white;font-weight:bold;font-size:16px;">Отчёт</span>
+    </div>
+
+    <div style="max-width:720px;margin:auto;padding:14px;">
+
+        <div style="display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;">
+            <button class="rp-tab active" onclick="showRpTab('rp1',this)" style="flex-shrink:0;padding:10px 16px;border-radius:10px;border:none;background:#e30613;color:white;font-size:14px;font-weight:bold;cursor:pointer;min-height:auto;width:auto;margin:0;">📋 Сводка</button>
+            <button class="rp-tab" onclick="showRpTab('rp2',this)" style="flex-shrink:0;padding:10px 16px;border-radius:10px;border:none;background:#e0e0e0;color:#333;font-size:14px;font-weight:bold;cursor:pointer;min-height:auto;width:auto;margin:0;">📅 По дням</button>
+            <button class="rp-tab" onclick="showRpTab('rp3',this)" style="flex-shrink:0;padding:10px 16px;border-radius:10px;border:none;background:#e0e0e0;color:#333;font-size:14px;font-weight:bold;cursor:pointer;min-height:auto;width:auto;margin:0;">📊 Аналитика</button>
+        </div>
+
+        <div id="rp1" class="rp-tab-content"></div>
+        <div id="rp2" class="rp-tab-content" style="display:none;"></div>
+        <div id="rp3" class="rp-tab-content" style="display:none;"></div>
+
+    </div>
 </div>
 
-<button onclick="saveSettings()">Сохранить настройки</button>
-
-</div>
-
+<!-- НИЖНЕЕ МЕНЮ -->
 <div class="bottom-nav">
-<button class="active" onclick="nav('calc',this)">💰</button>
-<button onclick="nav('reports',this)">📊</button>
-<button onclick="nav('calendar',this)">📅</button>
-<button onclick="nav('settings',this)">⚙️</button>
+
+    <button onclick="nav('calc', this)" class="active">
+        💰
+    </button>
+
+    <button onclick="nav('reports', this)">
+        📊
+    </button>
+
+    <button onclick="nav('calendar', this)">
+        📅
+    </button>
+
+    <button onclick="nav('settings', this)">
+        ⚙️
+    </button>
+
 </div>
 
 <script>
 
-let TG_USER_ID='guest';
+    // НАСТРОЙКИ
+    let settings = JSON.parse(localStorage.getItem('settings')) || {
 
-function userKey(key){
-return key+'_'+TG_USER_ID;
-}
+        hourRate:139,
+        cartRate:8,
+        ndfl:0.13,
 
-function loadUserSettings(){
+        rates:{
+            "ОС":2.25,
+            "Мультиотборка ОС":1.78,
+            "Охлажденка":1.37,
+            "Мультиотборка охлажденка":1.49,
+            "Заморозка":1.72,
+            "Мультиотборка заморозка":2.08,
+            "Овощи/фрукты":1.86,
+            "Мультиотборка овощи/фрукты":1.52,
+            "Алкоголь":2.38,
+            "Мультиотборка алкоголь":2.06
+        }
+    };
 
-settings=JSON.parse(
-localStorage.getItem(userKey('settings'))
-) || {
-hourRate:139,
-cartRate:8,
-ndfl:0.13,
-rates:{
-"ОС":2.25,
-"Мультиотборка ОС":1.78,
-"Охлажденка":1.37,
-"Мультиотборка охлажденка":1.49,
-"Заморозка":1.72,
-"Мультиотборка заморозка":2.08,
-"Овощи/фрукты":1.86,
-"Мультиотборка овощи/фрукты":1.52,
-"Алкоголь":2.38,
-"Мультиотборка алкоголь":2.06
-}
-};
-}
+    // НАВИГАЦИЯ
+    function nav(id,btn){
 
-let settings={};
+        document.querySelectorAll('.page').forEach(p=>{
+            p.classList.add('hidden');
+        });
 
-function nav(id,btn){
-document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
-document.getElementById(id).classList.remove('hidden');
-document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.remove('active'));
-btn.classList.add('active');
-if(id==='settings') openSettings();
-}
+        document.getElementById(id).classList.remove('hidden');
 
+        document.querySelectorAll('.bottom-nav button').forEach(b=>{
+            b.classList.remove('active');
+        });
+
+        btn.classList.add('active');
+
+        if(id==='settings'){
+            openSettings();
+        }
+    }
+
+    // ДОБАВИТЬ СКЛАД
 function addPick(){
-let div=document.createElement('div');
-let options='';
-Object.keys(settings.rates).forEach(k=>{
-options+=`<option value="${k}">${k}</option>`;
-});
 
-div.innerHTML=`
-<select class="pickType">${options}</select>
-<input type="number" class="pickQty" placeholder="Количество пиков">
-<button class="secondary" onclick="this.parentElement.remove()">Удалить склад</button>
-`;
+    let div = document.createElement('div');
 
-document.getElementById('picks').appendChild(div);
+    div.className = 'pick-item';
+
+    let options = '';
+
+    for(let k in settings.rates){
+
+        options += `
+        <option value="${k}">
+            ${k}
+        </option>
+        `;
+    }
+
+    div.innerHTML = `
+
+        <select class="pick-type">
+            ${options}
+        </select>
+
+        <input
+        type="number"
+        class="pick-qty"
+        placeholder="Количество пиков">
+
+        <button
+        type="button"
+        class="btn-secondary"
+        onclick="this.parentElement.remove()">
+
+        Удалить
+
+        </button>
+    `;
+
+    document
+    .getElementById('picks')
+    .appendChild(div);
 }
 
-function calculate(){
-let date=document.getElementById('date').value;
-let hours=+document.getElementById('hours').value||0;
-let carts=+document.getElementById('carts').value||0;
-let holiday=document.getElementById('holiday').checked;
+    // РАСЧЕТ
+    function calculate(){
+document.getElementById('result').innerHTML = '';
+        let date=document.getElementById('date').value;
 
-let calendar=JSON.parse(localStorage.getItem(userKey('calendar')))||[];
-let found=calendar.find(d=>d.date===date);
+    if(!date){
 
-if(found && found.type==='off'){
-alert('Это выходной день');
-return;
-}
+        document.getElementById('result').innerHTML=`
+        <div style="
+            background:#ffebee;
+            color:#c62828;
+            padding:12px;
+            border-radius:12px;
+            font-weight:bold;
+        ">
+        ❌ Выберите дату
+        </div>
+        `;
 
-let picks=[];
-let html='';
-let pickTotal=0;
-
-let hourRate=holiday?settings.hourRate*2:settings.hourRate;
-let hourSum=hours*hourRate;
-let cartSum=carts*settings.cartRate;
-
-document.querySelectorAll('#picks > div').forEach(div=>{
-let type=div.querySelector('.pickType').value;
-let qty=+div.querySelector('.pickQty').value||0;
-let sum=qty*settings.rates[type];
-
-pickTotal+=sum;
-
-picks.push({type,qty,sum});
-
-html+=`${type} (${qty}) — ${sum.toFixed(2)} руб<br>`;
-});
-
-let total=pickTotal+hourSum+cartSum;
-let final=total-(total*settings.ndfl);
-
-html+=`
-🚛 Телеги (${carts}) — ${cartSum.toFixed(2)} руб<br>
-⏱ Часы (${hours}) — ${hourSum.toFixed(2)} руб<br>
-<hr>
-💰 Итого до НДФЛ: ${total.toFixed(2)} руб<br>
-✅ Итого после НДФЛ: ${final.toFixed(2)} руб
-`;
-
-document.getElementById('result').innerHTML=html;
-
-return {date,hours,carts,picks,total,final,holiday};
-}
-
-function saveDay(){
-let d=calculate();
-if(!d)return;
-let arr=JSON.parse(localStorage.getItem(userKey('days')))||[];
-arr.push(d);
-localStorage.setItem(userKey('days'),JSON.stringify(arr));
-alert('Сохранено');
-}
-
-function deleteDay(index){
-let arr=JSON.parse(localStorage.getItem(userKey('days')))||[];
-arr.splice(index,1);
-localStorage.setItem(userKey('days'),JSON.stringify(arr));
-loadReports();
-}
-
-function loadReports(){
-let data=JSON.parse(localStorage.getItem(userKey('days')))||[];
-let year=+document.getElementById('yearSelect').value;
-let month=+document.getElementById('monthSelect').value;
-
-let html='';
-let totalAfter=0;
-let totalBefore=0;
-let totalHours=0;
-let totalCarts=0;
-let warehouseTotals={};
-
-let workedDays=0;
-
-data.forEach((d,i)=>{
-let dt=new Date(d.date);
-if(dt.getFullYear()!==year||dt.getMonth()!==month)return;
-
-workedDays++;
-
-totalAfter+=d.final;
-totalBefore+=d.total;
-totalHours+=d.hours;
-totalCarts+=d.carts;
-
-html+=`<div class="card"><b>${d.date}</b><br><br>`;
-
-d.picks.forEach(p=>{
-html+=`${p.type} (${p.qty}) — ${p.sum.toFixed(2)} руб<br>`;
-
-if(!warehouseTotals[p.type]){
-warehouseTotals[p.type]={qty:0,sum:0};
-}
-warehouseTotals[p.type].qty+=p.qty;
-warehouseTotals[p.type].sum+=p.sum;
-});
-
-html+=`
-🚛 Телеги (${d.carts}) — ${(d.carts*settings.cartRate).toFixed(2)} руб<br>
-⏱ Часы (${d.hours}) — ${(d.hours*settings.hourRate).toFixed(2)} руб<br>
-<hr>
-💰 Итого до НДФЛ: ${d.total.toFixed(2)} руб<br>
-✅ Итого после НДФЛ: ${d.final.toFixed(2)} руб
-<button class="secondary" onclick="deleteDay(${i})">Удалить день</button>
-</div>`;
-});
-
-document.getElementById('reportList').innerHTML=html;
-
-let summary='';
-
-for(let k in warehouseTotals){
-summary+=`${k} (${warehouseTotals[k].qty}) — ${warehouseTotals[k].sum.toFixed(2)} руб<br>`;
-}
-
-summary+=`
-<br>
-🚛 Телеги (${totalCarts}) — ${(totalCarts*settings.cartRate).toFixed(2)} руб<br>
-⏱ Часы (${totalHours}) — ${(totalHours*settings.hourRate).toFixed(2)} руб<br>
-<hr>
-💰 Итого до НДФЛ: ${totalBefore.toFixed(2)} руб<br>
-✅ Итого после НДФЛ: ${totalAfter.toFixed(2)} руб
-`;
-
-document.getElementById('summary').innerHTML=summary;
-
-let calendar=JSON.parse(localStorage.getItem(userKey('calendar')))||[];
-
-let workDays=calendar.filter(d=>{
-let dt=new Date(d.date);
-return dt.getFullYear()===year && dt.getMonth()===month && d.type==='work';
-}).length;
-
-let avg=workedDays?totalAfter/workedDays:0;
-let forecast=avg*workDays;
-
-document.getElementById('forecast').innerHTML=`
-Средний заработок за смену: ${avg.toFixed(2)} руб<br>
-Рабочих дней по графику: ${workDays}<br>
-Прогноз зарплаты: ${forecast.toFixed(2)} руб
-`;
-}
-
-function generateCalendar(){
-let start=document.getElementById('startDate').value;
-if(!start)return;
-
-let base=new Date(start);
-let arr=[];
-
-for(let i=0;i<3650;i++){
-let d=new Date(base);
-d.setDate(base.getDate()+i);
-
-let type=(Math.floor(i/2)%2===0)?'work':'off';
-
-arr.push({
-date:d.toISOString().split('T')[0],
-type
-});
-}
-
-localStorage.setItem(userKey('calendar'),JSON.stringify(arr));
-renderCalendar();
-}
-
-function renderCalendar(){
-let data=JSON.parse(localStorage.getItem(userKey('calendar')))||[];
-let year=+document.getElementById('calendarYear').value;
-let month=+document.getElementById('calendarMonth').value;
-
-let html='';
-
-data.forEach((d,i)=>{
-let dt=new Date(d.date);
-if(dt.getFullYear()!==year||dt.getMonth()!==month)return;
-
-html+=`<div class="day ${d.type}" onclick="toggleDay(${i})">
-<b>${d.date}</b><br>
-${d.type==='work'?'🟢 Рабочий':'🔴 Выходной'}
-</div>`;
-});
-
-document.getElementById('calendarList').innerHTML=html;
-}
-
-function toggleDay(i){
-let data=JSON.parse(localStorage.getItem(userKey('calendar')))||[];
-data[i].type=data[i].type==='work'?'off':'work';
-localStorage.setItem(userKey('calendar'),JSON.stringify(data));
-renderCalendar();
-}
-
-function openSettings(){
-document.getElementById('set_hourRate').value=settings.hourRate;
-document.getElementById('set_cartRate').value=settings.cartRate;
-document.getElementById('set_ndfl').value=settings.ndfl;
-
-let html='';
-
-for(let k in settings.rates){
-html+=`${k}<input data-type="${k}" value="${settings.rates[k]}">`;
-}
-
-document.getElementById('ratesList').innerHTML=html;
-}
-
-function saveSettings(){
-settings.hourRate=+document.getElementById('set_hourRate').value;
-settings.cartRate=+document.getElementById('set_cartRate').value;
-settings.ndfl=+document.getElementById('set_ndfl').value;
-
-document.querySelectorAll('#ratesList input').forEach(i=>{
-settings.rates[i.dataset.type]=+i.value;
-});
-
-localStorage.setItem(userKey('settings'),JSON.stringify(settings));
-alert('Сохранено');
-}
-
-async function exportExcel(){
-
-    let data = JSON.parse(
-        localStorage.getItem(
-            userKey('days')
-        )
-    ) || [];
-
-    if(data.length===0){
-
-        alert('Нет данных');
         return;
     }
 
-    let rows=[];
+       let calendar = JSON.parse(
+    localStorage.getItem('calendar')
+) || [];
 
-    data.forEach(d=>{
+let foundDay = calendar.find(item => {
 
-        d.picks.forEach(p=>{
-
-            rows.push({
-                date:d.date,
-                type:p.type,
-                qty:p.qty,
-                sum:p.sum.toFixed(2)
-            });
-
-        });
-
-        rows.push({
-            date:d.date,
-            type:'Телеги',
-            qty:d.carts,
-            sum:(d.carts*settings.cartRate).toFixed(2)
-        });
-
-        rows.push({
-            date:d.date,
-            type:'Часы',
-            qty:d.hours,
-            sum:(d.hours*settings.hourRate).toFixed(2)
-        });
-
-        rows.push({
-            date:d.date,
-            type:'ИТОГО ДО НДФЛ',
-            qty:'',
-            sum:d.total.toFixed(2)
-        });
-
-        rows.push({
-            date:d.date,
-            type:'ИТОГО ПОСЛЕ НДФЛ',
-            qty:'',
-            sum:d.final.toFixed(2)
-        });
-
-    });
-
-    try{
-
-        await fetch('http://192.168.0.21:5000/excel',{
-            method:'POST',
-            headers:{
-                'Content-Type':'application/json'
-            },
-            body:JSON.stringify({
-                user_id:tg_real_id,
-                rows:rows
-            })
-        });
-
-        alert('Excel отправлен в Telegram');
-
-    }catch(e){
-
-        console.log(e);
-
-        alert('Ошибка отправки');
-    }
-}
-
-window.addEventListener('DOMContentLoaded',()=>{
-
-    // ГОДА
-    const currentYear=new Date().getFullYear();
-    const currentMonth=new Date().getMonth();
-
-    for(let y=2025;y<=2100;y++){
-
-        const o1=document.createElement('option');
-        o1.value=y;
-        o1.textContent=y;
-        document.getElementById('yearSelect').appendChild(o1);
-
-        const o2=document.createElement('option');
-        o2.value=y;
-        o2.textContent=y;
-        document.getElementById('calendarYear').appendChild(o2);
-    }
-
-    document.getElementById('yearSelect').value=currentYear;
-    document.getElementById('calendarYear').value=currentYear;
-    document.getElementById('monthSelect').value=currentMonth;
-    document.getElementById('calendarMonth').value=currentMonth;
-
-    // TELEGRAM
-    try{
-
-        if(window.Telegram && window.Telegram.WebApp){
-
-            const tg=window.Telegram.WebApp;
-
-            tg.ready();
-            tg.expand();
-
-            const user=tg.initDataUnsafe?.user;
-
-            if(user && user.id){
-
-                TG_USER_ID=String(user.id);
-
-                localStorage.setItem(
-    'tg_real_id',
-    TG_USER_ID
-);
-
-                document.getElementById('userInfo').innerHTML=`👋 ${user.first_name || ''} ${user.username ? '@'+user.username : ''}`;
-
-            }else{
-
-                TG_USER_ID='guest';
-
-                document.getElementById('userInfo').innerHTML='👤 Telegram пользователь';
-            }
-
-        }else{
-
-            TG_USER_ID='browser';
-
-            document.getElementById('userInfo').innerHTML='🌐 Режим браузера';
-        }
-
-    }catch(e){
-
-        console.log(e);
-
-        TG_USER_ID='error';
-
-        document.getElementById('userInfo').innerHTML='⚠️ Ошибка Telegram';
-    }
-
-    // ЗАГРУЗКА ДАННЫХ
-    loadUserSettings();
-    openSettings();
-
-    // ПЕРВЫЙ СКЛАД
-    if(document.getElementById('picks').children.length===0){
-        addPick();
-    }
+    return item.date === date;
 
 });
 
+if(foundDay && foundDay.type === 'off'){
+
+    document.getElementById('result').innerHTML = `
+    <div style="
+        background:#ffebee;
+        color:#c62828;
+        padding:14px;
+        border-radius:12px;
+        font-weight:bold;
+        margin-top:10px;
+    ">
+        ❌ Этот день отмечен как выходной
+    </div>
+    `;
+
+    return null;
+}
+
+        let shiftType = foundDay ? foundDay.type : 'work'; // 'work' или 'extra'
+        let isExtra = shiftType === 'extra';
+
+        let hours=+document.getElementById('hours').value || 0;
+
+        let carts=+document.getElementById('carts').value || 0;
+
+        let holiday=document.getElementById('holiday').checked;
+
+    // Допсмена ИЛИ праздник дают двойную ставку за часы
+    let hourRate=(holiday || isExtra)
+        ? settings.hourRate*2
+        : settings.hourRate;
+
+    let hourSum=hours*hourRate;
+
+        let cartSum=carts*settings.cartRate;
+
+        let picks=[];
+
+        let html='';
+
+document.querySelectorAll('.pick-item').forEach(div=>{
+
+    let typeEl =
+    div.querySelector('.pick-type');
+
+    let qtyEl =
+    div.querySelector('.pick-qty');
+
+    if(!typeEl || !qtyEl){
+        return;
+    }
+
+    let type = typeEl.value;
+
+    let qty = +qtyEl.value || 0;
+
+    let rate = settings.rates[type] || 0;
+
+    let sum = qty * rate;
+
+    picks.push({
+        type:type,
+        qty:qty,
+        sum:sum
+    });
+
+    html += `
+    📦 ${type} (${qty})
+    —
+    ${sum.toFixed(2)} руб
+    <br>
+    `;
+});
+
+let pickTotal = 0;
+
+picks.forEach(p=>{
+    pickTotal += p.sum;
+});
+
+        let total=hourSum+cartSum+pickTotal;
+
+        let final=total-(total*settings.ndfl);
+
+        html += `
+        🚛 Телеги (${carts}) —
+        ${cartSum.toFixed(2)} руб<br>
+
+        ⏱ Часы (${hours})
+    ${holiday ? '(праздничный день ×2)' : ''}${isExtra ? ' ⭐(допсмена ×2)' : ''}
+    —
+    ${hourSum.toFixed(2)} руб
+
+        <hr>
+
+        💰 Итого до НДФЛ:
+        ${total.toFixed(2)} руб<br>
+
+        ✅ Итого после НДФЛ:
+        ${final.toFixed(2)} руб
+        `;
+
+        document.getElementById('result').innerHTML=html;
+
+        return {
+            date,
+        hours,
+        carts,
+        picks,
+        total,
+        final,
+        holiday,
+        shiftType,
+        isExtra
+        };
+    }
+
+    // СОХРАНИТЬ ДЕНЬ
+function saveDay(){
+
+    let d = calculate();
+
+    if(!d) return;
+
+    let arr = JSON.parse(
+        localStorage.getItem('days')
+    ) || [];
+
+    // проверяем есть ли уже такой день
+    let existingIndex = arr.findIndex(
+        item => item.date === d.date
+    );
+
+    // если день уже есть — заменяем
+    if(existingIndex !== -1){
+
+        arr[existingIndex] = d;
+
+    }else{
+
+        // если нет — добавляем
+        arr.push(d);
+
+    }
+
+    localStorage.setItem(
+        'days',
+        JSON.stringify(arr)
+    );
+
+    alert("Сохранено");
+}
+
+    // УДАЛИТЬ ДЕНЬ
+ function deleteDay(index){
+
+    let arr = JSON.parse(
+        localStorage.getItem('days')
+    ) || [];
+
+    index = Number(index);
+
+    arr.splice(index, 1);
+
+    localStorage.setItem(
+        'days',
+        JSON.stringify(arr)
+    );
+
+    loadReports();
+}
+
+    // ОТЧЕТЫ
+    function loadReports(){
+
+    let data = JSON.parse(
+        localStorage.getItem('days')
+    ) || [];
+
+    let calendar = JSON.parse(
+        localStorage.getItem('calendar')
+    ) || [];
+
+    let year = +document.getElementById('yearSelect').value;
+
+    let month = +document.getElementById('monthSelect').value;
+
+    let html = '';
+
+    let totalAfter = 0;
+
+    let worked = 0;
+    let workShifts = 0;
+    let extraShifts = 0;
+
+    let workDays = 0;
+
+let totalHours=0;
+let totalHoursMoney=0;
+
+let totalCarts=0;
+let totalCartsMoney=0;
+
+let extraIncome = 0;
+
+    let pickTotals = {};
+
+    // РАБОЧИЕ ДНИ ПО КАЛЕНДАРЮ
+    calendar.forEach(c=>{
+
+        let d = new Date(c.date);
+
+        if(
+            d.getFullYear() === year &&
+            d.getMonth() === month &&
+            (c.type === 'work' || c.type === 'extra')
+        ){
+            workDays++;
+        }
+
+    });
+
+    // Сортируем по дате — всегда по возрастанию
+    let monthData = data
+        .filter(d=>{
+            let dd = new Date(d.date);
+            return dd.getFullYear() === year && dd.getMonth() === month;
+        })
+        .sort((a,b)=> a.date.localeCompare(b.date));
+
+    // ОТЧЕТ ПО ДНЯМ
+    monthData.forEach((d,i)=>{
+
+        let cal = calendar.find(c=>c.date===d.date);
+        let isExtra = d.isExtra || (cal && cal.type === 'extra') || false;
+
+        if(cal && (cal.type==='work' || cal.type==='extra')){
+            worked++;
+        }
+        if(isExtra){
+            extraShifts++;
+        } else {
+            workShifts++;
+        }
+
+        totalAfter += d.final;
+
+totalHours += d.hours;
+
+totalCarts += d.carts;
+
+// Допсмена ИЛИ праздник — двойная ставка за часы
+let currentHourRate = (d.holiday || isExtra)
+    ? settings.hourRate * 2
+    : settings.hourRate;
+
+totalHoursMoney +=
+    d.hours * currentHourRate;
+
+totalCartsMoney +=
+    d.carts * settings.cartRate;
+
+if(isExtra){
+    extraIncome += d.final;
+}
+
+        html += `<div class="block">`;
+
+        html += `
+        <b>📅 ${d.date}${isExtra ? ' ⭐' : ''}</b>
+        <br><br>
+        `;
+
+        // ПИКИ
+        d.picks.forEach(p=>{
+
+            if(!pickTotals[p.type]){
+
+                pickTotals[p.type] = {
+                    qty:0,
+                    sum:0
+                };
+
+            }
+
+            pickTotals[p.type].qty += p.qty;
+
+            pickTotals[p.type].sum += p.sum;
+
+            html += `
+            📦 ${p.type}
+            (${p.qty})
+            —
+            ${p.sum.toFixed(2)} руб
+            <br>
+            `;
+        });
+
+        // ТЕЛЕГИ
+        let cartSum =
+            d.carts * settings.cartRate;
+
+        html += `
+        <br>
+
+        🚛 Телеги
+        (${d.carts})
+        —
+        ${cartSum.toFixed(2)} руб
+        <br>
+        `;
+
+        // ЧАСЫ
+        let hourRate = (d.holiday || isExtra)
+            ? settings.hourRate * 2
+            : settings.hourRate;
+
+        let hourSum =
+            d.hours * hourRate;
+
+        html += `
+        ⏱ Часы
+        (${d.hours})
+        ${d.holiday ? '(праздничный ×2)' : ''}${isExtra ? ' ⭐(допсмена ×2)' : ''}
+        —
+        ${hourSum.toFixed(2)} руб
+        <br>
+
+        <hr>
+
+        💰 Итого до НДФЛ:
+        ${d.total.toFixed(2)} руб
+        <br>
+
+        ✅ Итого после НДФЛ:
+        ${d.final.toFixed(2)} руб
+        <br><br>
+        `;
+
+
+
+        html += `</div>`;
+
+    });
+
+    document.getElementById(
+        'reportList'
+    ).innerHTML = html;
+
+    // ПРОГНОЗ
+    let avgAfter = worked
+    ? totalAfter / worked
+    : 0;
+
+let forecastAfter =
+    avgAfter * workDays;
+
+let forecastBefore =
+    forecastAfter / (1 - settings.ndfl);
+
+let forecastNdfl =
+    forecastBefore - forecastAfter;
+
+
+
+    // ИТОГИ ЗА МЕСЯЦ
+    let summaryHtml = '';
+
+    for(let type in pickTotals){
+
+        summaryHtml += `
+        📦 ${type}
+        (${pickTotals[type].qty})
+        —
+        ${pickTotals[type].sum.toFixed(2)} руб
+        <br>
+        `;
+    }
+
+    summaryHtml += `
+
+    <br>
+
+🚛 Телеги
+(${totalCarts})
+—
+${totalCartsMoney.toFixed(2)} руб
+<br>
+
+⏱ Часы
+(${totalHours})
+—
+${totalHoursMoney.toFixed(2)} руб
+<br>
+
+<hr>
+
+📊 Смен всего:
+${worked}
+<br>
+
+🟢 Рабочих смен:
+${workShifts}
+<br>
+
+🔵⭐ Дополнительных смен:
+${extraShifts}
+<br>
+
+💵 Доход от допсмен:
+${extraIncome.toFixed(2)} руб
+<br>
+
+<hr>
+
+    💰 Общий доход:
+    ${totalAfter.toFixed(2)} руб
+    <br>
+
+    📅 Рабочих дней по графику:
+    ${workDays}
+    <br>
+
+    📈 Средний заработок:
+${avgAfter.toFixed(2)} руб
+<br>
+
+<hr>
+
+🔮 Прогноз до НДФЛ:
+${forecastBefore.toFixed(2)} руб
+<br>
+
+🧾 НДФЛ:
+${forecastNdfl.toFixed(2)} руб
+<br>
+
+✅ Прогноз после НДФЛ:
+${forecastAfter.toFixed(2)} руб
+`;
+
+document.getElementById(
+    'summary'
+).innerHTML = summaryHtml;
+
+    let select =
+document.getElementById('deleteDate');
+
+select.innerHTML = '';
+
+data.forEach((d)=>{
+
+    let dd = new Date(d.date);
+
+    if(
+        dd.getFullYear() !== year ||
+        dd.getMonth() !== month
+    ) return;
+
+    let option =
+    document.createElement('option');
+
+    option.value = d.date;
+
+    option.textContent = d.date;
+
+    select.appendChild(option);
+
+});
+
+renderCharts(monthData);
+
+}
+
+// ── ГРАФИКИ ──────────────────────────────────────
+let _chartMoney = null;
+let _chartPicksByDay = null;
+let _chartPicksByType = null;
+
+function showChartTab(tab){
+    const moneyWrap = document.getElementById('chartMoneyWrap');
+    const picksWrap = document.getElementById('chartPicksWrap');
+    const btnMoney  = document.getElementById('chartTabMoney');
+    const btnPicks  = document.getElementById('chartTabPicks');
+
+    if(tab === 'money'){
+        moneyWrap.style.display = 'block';
+        picksWrap.style.display = 'none';
+        btnMoney.style.background = '#e30613';
+        btnMoney.style.color = 'white';
+        btnPicks.style.background = '#e0e0e0';
+        btnPicks.style.color = '#333';
+    } else {
+        moneyWrap.style.display = 'none';
+        picksWrap.style.display = 'block';
+        btnPicks.style.background = '#e30613';
+        btnPicks.style.color = 'white';
+        btnMoney.style.background = '#e0e0e0';
+        btnMoney.style.color = '#333';
+    }
+}
+
+function renderCharts(monthData){
+    const emptyState = document.getElementById('chartEmptyState');
+    const moneyWrap   = document.getElementById('chartMoneyWrap');
+    const picksWrap    = document.getElementById('chartPicksWrap');
+
+    if(!monthData || monthData.length === 0){
+        emptyState.style.display = 'block';
+        moneyWrap.style.display = 'none';
+        picksWrap.style.display = 'none';
+        return;
+    }
+
+    emptyState.style.display = 'none';
+    // Восстанавливаем видимость по текущей вкладке (по умолчанию — деньги)
+    if(picksWrap.style.display !== 'block'){
+        moneyWrap.style.display = 'block';
+    }
+
+    function fmtShort(dateStr){
+        const p = dateStr.split('-');
+        return p[2] + '.' + p[1];
+    }
+
+    const labels = monthData.map(d => fmtShort(d.date));
+
+    // ── График 1: Деньги по дням ──────────────────
+    const beforeData = monthData.map(d => +d.total.toFixed(2));
+    const afterData  = monthData.map(d => +d.final.toFixed(2));
+
+    if(_chartMoney) _chartMoney.destroy();
+    const ctxMoney = document.getElementById('chartMoney').getContext('2d');
+    _chartMoney = new Chart(ctxMoney, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'До НДФЛ',
+                    data: beforeData,
+                    borderColor: '#90a4ae',
+                    backgroundColor: 'rgba(144,164,174,0.1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    pointRadius: 3
+                },
+                {
+                    label: 'После НДФЛ',
+                    data: afterData,
+                    borderColor: '#e30613',
+                    backgroundColor: 'rgba(227,6,19,0.1)',
+                    borderWidth: 3,
+                    tension: 0.3,
+                    pointRadius: 4,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { size: 11 } } },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(2) + ' ₽'
+                    }
+                }
+            },
+            scales: {
+                y: { beginAtZero: true, ticks: { callback: v => v + ' ₽' } },
+                x: { ticks: { font: { size: 10 } } }
+            }
+        }
+    });
+
+    // ── График 2: Пики по дням (накопительные бары) ──
+    const calendar = JSON.parse(localStorage.getItem('calendar')) || [];
+    const pickTypesSet = new Set();
+    monthData.forEach(d => d.picks.forEach(p => pickTypesSet.add(p.type)));
+    const pickTypes = Array.from(pickTypesSet);
+
+    const palette = ['#e30613','#1565c0','#2e7d32','#e65100','#6a1b9a','#00838f','#ad1457','#558b2f','#4527a0','#37474f'];
+
+    const pickDatasets = pickTypes.map((type, idx) => ({
+        label: type,
+        data: monthData.map(d => {
+            const found = d.picks.find(p => p.type === type);
+            return found ? found.qty : 0;
+        }),
+        backgroundColor: palette[idx % palette.length]
+    }));
+
+    if(_chartPicksByDay) _chartPicksByDay.destroy();
+    const ctxPicksDay = document.getElementById('chartPicksByDay').getContext('2d');
+    _chartPicksByDay = new Chart(ctxPicksDay, {
+        type: 'bar',
+        data: { labels: labels, datasets: pickDatasets },
+        options: {
+            responsive: true,
+            plugins: {
+                title: { display: true, text: 'Пики по дням', font: { size: 13 } },
+                legend: { position: 'bottom', labels: { font: { size: 10 } } }
+            },
+            scales: {
+                x: { stacked: true, ticks: { font: { size: 10 } } },
+                y: { stacked: true, beginAtZero: true, title: { display: true, text: 'шт' } }
+            }
+        }
+    });
+
+    // ── График 3: Доля по типам складов (пирог) ──────
+    const pickTotalsByType = {};
+    monthData.forEach(d => {
+        d.picks.forEach(p => {
+            pickTotalsByType[p.type] = (pickTotalsByType[p.type] || 0) + p.qty;
+        });
+    });
+
+    if(_chartPicksByType) _chartPicksByType.destroy();
+    const ctxPicksType = document.getElementById('chartPicksByType').getContext('2d');
+    _chartPicksByType = new Chart(ctxPicksType, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(pickTotalsByType),
+            datasets: [{
+                data: Object.values(pickTotalsByType),
+                backgroundColor: Object.keys(pickTotalsByType).map((_, idx) => palette[idx % palette.length])
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: { display: true, text: 'Доля складов по количеству пиков', font: { size: 13 } },
+                legend: { position: 'bottom', labels: { font: { size: 10 } } }
+            }
+        }
+    });
+}
+
+    // СОЗДАТЬ ГРАФИК
+    function generateCalendar(){
+
+        let startValue=document.getElementById('startDate').value;
+
+        if(!startValue){
+            alert("Выберите первый рабочий день");
+            return;
+        }
+
+        let start=new Date(startValue);
+
+        let days=[];
+
+        // сразу строим на 10 лет вперед
+        for(let i=0;i<3650;i++){
+
+            let d=new Date(start);
+
+            d.setDate(start.getDate()+i);
+
+            let type=(Math.floor(i/2)%2===0)
+                ? 'work'
+                : 'off';
+
+            days.push({
+                date:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'),
+                type
+            });
+        }
+
+        localStorage.setItem(
+            'calendar',
+            JSON.stringify(days)
+        );
+
+        renderCalendar();
+    }
+
+    // ПОКАЗАТЬ КАЛЕНДАРЬ
+
+function renderCalendar(){
+
+    let data = JSON.parse(localStorage.getItem('calendar')) || [];
+    let year = +document.getElementById('calendarYear').value;
+    let month = +document.getElementById('calendarMonth').value;
+
+    let monthDays = data.filter(d=>{
+        let current = new Date(d.date);
+        return current.getFullYear()===year &&
+               current.getMonth()===month;
+    });
+
+    let html = `
+    <div class="calendar-grid">
+        <div class="calendar-head">Пн</div>
+        <div class="calendar-head">Вт</div>
+        <div class="calendar-head">Ср</div>
+        <div class="calendar-head">Чт</div>
+        <div class="calendar-head">Пт</div>
+        <div class="calendar-head">Сб</div>
+        <div class="calendar-head">Вс</div>
+    `;
+
+    let firstDate = new Date(year, month, 1);
+    let firstDay = (firstDate.getDay() + 6) % 7;
+
+    for(let i=0;i<firstDay;i++){
+        html += `<div class="calendar-empty"></div>`;
+    }
+
+    monthDays.forEach(d=>{
+        let current = new Date(d.date);
+        let index = data.findIndex(x => x.date === d.date);
+
+        let cls = d.type==='work' ? 'calendar-work'
+                : d.type==='extra' ? 'calendar-extra'
+                : 'calendar-off';
+
+        let mark = d.type==='extra' ? '⭐' : '';
+
+        html += `
+        <div class="calendar-cell ${cls}"
+             onclick="toggleDay(${index})">
+            ${current.getDate()}${mark}
+        </div>`;
+    });
+
+    html += `</div>`;
+
+    html += `
+    <div style="display:flex;gap:14px;justify-content:center;margin-top:14px;font-size:12px;color:#555;flex-wrap:wrap;">
+        <span>🔴 Выходной</span>
+        <span>🟢 Рабочая смена</span>
+        <span>🔵 Допсмена</span>
+    </div>`;
+
+    document.getElementById('calendarList').innerHTML = html;
+}
+
+// ИЗМЕНИТЬ ДЕНЬ — переключение по кругу: off → work → extra → off
+    function toggleDay(i){
+
+        let data=JSON.parse(localStorage.getItem('calendar')) || [];
+
+        let current = data[i].type;
+        let next =
+            current === 'off'   ? 'work'  :
+            current === 'work'  ? 'extra' :
+            'off';
+
+        data[i].type = next;
+
+        localStorage.setItem(
+            'calendar',
+            JSON.stringify(data)
+        );
+
+        renderCalendar();
+    }
+    // НАСТРОЙКИ
+    function openSettings(){
+
+        document.getElementById('set_hourRate').value=settings.hourRate;
+
+        document.getElementById('set_cartRate').value=settings.cartRate;
+
+        document.getElementById('set_ndfl').value=settings.ndfl;
+
+        let html='';
+
+        for(let k in settings.rates){
+
+            html += `
+            ${k}
+            <input
+            data-type="${k}"
+            value="${settings.rates[k]}">
+            `;
+        }
+
+        document.getElementById('ratesList').innerHTML=html;
+    }
+
+    // СОХРАНИТЬ НАСТРОЙКИ
+    function saveSettings(){
+
+        settings.hourRate=
+            +document.getElementById('set_hourRate').value;
+
+        settings.cartRate=
+            +document.getElementById('set_cartRate').value;
+
+        settings.ndfl=
+            +document.getElementById('set_ndfl').value;
+
+        document.querySelectorAll('#ratesList input')
+        .forEach(i=>{
+
+            settings.rates[i.dataset.type]=+i.value;
+        });
+
+        localStorage.setItem(
+            'settings',
+            JSON.stringify(settings)
+        );
+
+        alert("Настройки сохранены");
+    }
+
+
+
+    // ЭКСПОРТ В EXCEL — стилизованный отчёт
+    function exportExcel(){
+
+    const data = JSON.parse(localStorage.getItem('days')) || [];
+    const calendar = JSON.parse(localStorage.getItem('calendar')) || [];
+    const year = +document.getElementById('yearSelect').value;
+    const month = +document.getElementById('monthSelect').value;
+
+    const monthNames = ["Январь","Февраль","Март","Апрель","Май","Июнь",
+                        "Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
+    const monthName = monthNames[month];
+
+    // --- Фильтруем нужный месяц ---
+    const monthData = data.filter(d => {
+        const dd = new Date(d.date);
+        return dd.getFullYear() === year && dd.getMonth() === month;
+    }).sort((a,b) => a.date.localeCompare(b.date));
+
+    // --- Считаем итоги ---
+    let totalBefore = 0, totalAfter = 0, totalHours = 0, totalCarts = 0;
+    const pickTotals = {};
+    let worked = 0, workShifts = 0, extraShifts = 0, extraIncome = 0;
+
+    monthData.forEach(d => {
+        totalBefore += d.total;
+        totalAfter  += d.final;
+        totalHours  += d.hours;
+        totalCarts  += d.carts;
+        const cal = calendar.find(c => c.date === d.date);
+        const isExtra = d.isExtra || (cal && cal.type === 'extra') || false;
+        if(cal && (cal.type === 'work' || cal.type === 'extra')) worked++;
+        if(isExtra){ extraShifts++; extraIncome += d.final; } else { workShifts++; }
+        d.picks.forEach(p => {
+            if(!pickTotals[p.type]) pickTotals[p.type] = {qty:0, sum:0};
+            pickTotals[p.type].qty += p.qty;
+            pickTotals[p.type].sum += p.sum;
+        });
+    });
+
+    const workDays = calendar.filter(c => {
+        const d = new Date(c.date);
+        return d.getFullYear()===year && d.getMonth()===month && (c.type==='work' || c.type==='extra');
+    }).length;
+
+    const ndflTotal = totalBefore - totalAfter;
+    const avgDay    = worked ? (totalAfter / worked) : 0;
+    const forecast  = avgDay * workDays;
+    const forecastBefore = worked ? forecast / (1 - settings.ndfl) : 0;
+
+    const avgHours  = worked ? (totalHours / worked) : 0;
+    const avgCarts  = worked ? (totalCarts / worked) : 0;
+
+    // --- Лучший день ---
+    let bestDay = null, bestVal = 0;
+    monthData.forEach(d => { if(d.final > bestVal){ bestVal = d.final; bestDay = d.date; } });
+
+    // ===================== СТИЛИ =====================
+    const RED       = "E30613";
+    const RED_LIGHT = "FDECEA";
+    const GREEN_L   = "E8F5E9";
+    const GREEN_D   = "2E7D32";
+    const YELLOW_L  = "FFF9C4";
+    const BLUE_L    = "E3F2FD";
+    const BLUE_D    = "1565C0";
+    const GRAY_L    = "F5F5F5";
+    const GRAY_D    = "616161";
+    const WHITE     = "FFFFFF";
+    const BLACK     = "000000";
+
+    // Хелперы стилей SheetJS
+    function s(opts){
+        return {
+            font:      opts.font      || {name:"Arial", sz: opts.sz || 11, color:{rgb: opts.color || BLACK}, bold: !!opts.bold},
+            fill:      opts.bg        ? {patternType:"solid", fgColor:{rgb: opts.bg}} : {patternType:"none"},
+            alignment: {horizontal: opts.align || "left", vertical:"center", wrapText: !!opts.wrap},
+            border:    opts.border !== false ? {
+                top:    {style:"thin", color:{rgb:"DDDDDD"}},
+                bottom: {style:"thin", color:{rgb:"DDDDDD"}},
+                left:   {style:"thin", color:{rgb:"DDDDDD"}},
+                right:  {style:"thin", color:{rgb:"DDDDDD"}}
+            } : {}
+        };
+    }
+
+    function rub(n){ return n.toFixed(2) + " ₽"; }
+    function fmt(d){
+        // YYYY-MM-DD → DD.MM.YYYY
+        const p = d.split("-");
+        return p[2]+"."+p[1]+"."+p[0];
+    }
+
+    // ============ ЛИСТ 1: РАСЧЁТНЫЙ ЛИСТ ============
+    const ws1 = {};
+    const merges = [];
+    let R = 0; // текущая строка (0-based)
+
+    function cell(c, r, v, style){
+        const ref = XLSX.utils.encode_cell({c,r});
+        ws1[ref] = {v, t: typeof v === 'number' ? 'n' : 's', s: style};
+    }
+    function merge(r1,c1,r2,c2){ merges.push({s:{r:r1,c:c1},e:{r:r2,c:c2}}); }
+    function emptyRow(r, bg){
+        for(let c=0;c<5;c++) cell(c,r,"",s({bg, border:false}));
+    }
+
+    // --- СТРОКА 0: Шапка Магнит ---
+    const hStyle = s({bold:true, sz:16, color:WHITE, bg:RED, align:"center"});
+    merge(R,0,R,4);
+    cell(0,R,"📦 РАСЧЁТНЫЙ ЛИСТ МАГНИТ",hStyle);
+    R++;
+
+    // --- СТРОКА 1: Месяц/год ---
+    const subStyle = s({bold:true, sz:12, color:WHITE, bg:RED, align:"center"});
+    merge(R,0,R,4);
+    cell(0,R,`${monthName} ${year}`,subStyle);
+    R++;
+
+    // --- Пустая строка ---
+    emptyRow(R, GRAY_L); R++;
+
+    // --- БЛОК: Общая информация ---
+    merge(R,0,R,4);
+    cell(0,R,"📋  ОБЩАЯ ИНФОРМАЦИЯ",s({bold:true, sz:12, color:WHITE, bg:GRAY_D, align:"center"}));
+    R++;
+
+    const infoRows = [
+        ["📅 Период",          `${monthName} ${year}`,              null],
+        ["🗓 Рабочих дней",    workDays,                             null],
+        ["✅ Отработано смен",  worked,                              null],
+        ["🟢 Рабочих смен",     workShifts,                          null],
+        ["🔵 Допсмен",          extraShifts,                         BLUE_L],
+        ["⏱ Всего часов",      totalHours,                          null],
+        ["💰 До НДФЛ",         rub(totalBefore),                    GREEN_L],
+        ["🧾 НДФЛ ("+Math.round(settings.ndfl*100)+"%)",rub(ndflTotal), RED_LIGHT],
+        ["✨ После НДФЛ",      rub(totalAfter),                     GREEN_L],
+        ["💵 Доход от допсмен", rub(extraIncome),                   BLUE_L],
+        ["🔮 Прогноз",         rub(forecast),                       YELLOW_L],
+    ];
+
+    infoRows.forEach(([label, value, bg])=>{
+        cell(0,R,label,  s({bold:true,  bg: bg||WHITE}));
+        merge(R,1,R,2);
+        cell(1,R,value,  s({align:"right", bg: bg||WHITE, color: bg===GREEN_L ? GREEN_D : bg===RED_LIGHT ? RED : BLACK}));
+        cell(3,R,"",     s({bg:WHITE, border:false}));
+        cell(4,R,"",     s({bg:WHITE, border:false}));
+        R++;
+    });
+
+    emptyRow(R, GRAY_L); R++;
+
+    // --- БЛОК: Производственные показатели ---
+    merge(R,0,R,4);
+    cell(0,R,"📦  ПРОИЗВОДСТВЕННЫЕ ПОКАЗАТЕЛИ",s({bold:true, sz:12, color:WHITE, bg:BLUE_D, align:"center"}));
+    R++;
+
+    const prodRows = [];
+    for(const type in pickTotals){
+        prodRows.push([`  ${type}`, pickTotals[type].qty + " пик", rub(pickTotals[type].sum)]);
+    }
+    prodRows.push(["🚛 Телеги", totalCarts + " шт", rub(totalCarts * settings.cartRate)]);
+    prodRows.push(["⏱ Часы",   totalHours + " ч",  rub(totalHours * settings.hourRate)]);
+
+    prodRows.forEach(([label, qty, sum])=>{
+        cell(0,R, label, s({bg:BLUE_L}));
+        merge(R,1,R,2);
+        cell(1,R, qty,   s({align:"center", bg:BLUE_L}));
+        merge(R,3,R,4);
+        cell(3,R, sum,   s({align:"right",  bg:BLUE_L, bold:true}));
+        R++;
+    });
+
+    emptyRow(R, GRAY_L); R++;
+
+    // --- БЛОК: Финансовые итоги ---
+    merge(R,0,R,4);
+    cell(0,R,"💰  ФИНАНСОВЫЕ ИТОГИ",s({bold:true, sz:12, color:WHITE, bg:GREEN_D, align:"center"}));
+    R++;
+
+    const finRows = [
+        ["📊 Средний заработок/день", rub(avgDay),        YELLOW_L],
+        ["⏱ Среднее часов/день",      avgHours.toFixed(1)+" ч", WHITE],
+        ["🚛 Средние телеги/день",     avgCarts.toFixed(1)+" шт", WHITE],
+        ["🏆 Лучший день",             bestDay ? fmt(bestDay)+" — "+rub(bestVal) : "—", YELLOW_L],
+        ["🔮 Прогноз до НДФЛ",        rub(forecastBefore), GREEN_L],
+        ["✅ Прогноз после НДФЛ",      rub(forecast),       GREEN_L],
+    ];
+
+    finRows.forEach(([label, val, bg])=>{
+        cell(0,R, label, s({bold:true, bg}));
+        merge(R,1,R,4);
+        cell(1,R, val,   s({align:"right", bg, bold:true, color: bg===GREEN_L ? GREEN_D : BLACK}));
+        R++;
+    });
+
+    emptyRow(R, GRAY_L); R++;
+
+    // --- БЛОК: Таблица по дням ---
+    merge(R,0,R,4);
+    cell(0,R,"📅  ДЕТАЛИЗАЦИЯ ПО ДНЯМ",s({bold:true, sz:12, color:WHITE, bg:GRAY_D, align:"center"}));
+    R++;
+
+    // Заголовки таблицы
+    const thStyle = s({bold:true, bg:GRAY_D, color:WHITE, align:"center"});
+    cell(0,R,"Дата",         thStyle);
+    cell(1,R,"Тип",          thStyle);
+    cell(2,R,"Количество",   thStyle);
+    cell(3,R,"Тариф",        thStyle);
+    cell(4,R,"Сумма",        thStyle);
+    R++;
+
+    const rowBg  = [WHITE, GRAY_L];
+    let rowIdx   = 0;
+
+    monthData.forEach(d=>{
+        const bg = rowBg[rowIdx % 2];
+        const isHoliday = d.holiday;
+        const cal = calendar.find(c => c.date === d.date);
+        const isExtra = d.isExtra || (cal && cal.type === 'extra') || false;
+        const highlightBg = (isHoliday || isExtra) ? (isExtra ? BLUE_L : YELLOW_L) : bg;
+        const dateLabel = fmt(d.date) + (isExtra ? " ⭐" : "");
+
+        // Пики
+        d.picks.forEach(p=>{
+            cell(0,R, dateLabel,            s({bg: highlightBg}));
+            cell(1,R, p.type,               s({bg: highlightBg}));
+            cell(2,R, p.qty,                s({align:"center", bg: highlightBg}));
+            cell(3,R, settings.rates[p.type]|| 0, s({align:"right",  bg: highlightBg}));
+            cell(4,R, +p.sum.toFixed(2),    s({align:"right",  bg: highlightBg, bold:true}));
+            R++;
+        });
+
+        // Телеги
+        const cartSum = d.carts * settings.cartRate;
+        cell(0,R, dateLabel,         s({bg}));
+        cell(1,R, "🚛 Телеги",       s({bg}));
+        cell(2,R, d.carts,           s({align:"center", bg}));
+        cell(3,R, settings.cartRate, s({align:"right",  bg}));
+        cell(4,R, +cartSum.toFixed(2), s({align:"right", bg, bold:true}));
+        R++;
+
+        // Часы (допсмена ИЛИ праздник = ×2)
+        const hrRate  = (isHoliday || isExtra) ? settings.hourRate*2 : settings.hourRate;
+        const hrSum   = d.hours * hrRate;
+        const hrLabel = isExtra ? "⏱ Часы ⭐(допсмена ×2)" : isHoliday ? "⏱ Часы (×2)" : "⏱ Часы";
+        cell(0,R, dateLabel,   s({bg: highlightBg}));
+        cell(1,R, hrLabel,     s({bg: highlightBg}));
+        cell(2,R, d.hours,     s({align:"center", bg: highlightBg}));
+        cell(3,R, hrRate,      s({align:"right",  bg: highlightBg}));
+        cell(4,R, +hrSum.toFixed(2), s({align:"right", bg: highlightBg, bold:true}));
+        R++;
+
+        // Строка итога дня
+        cell(0,R, dateLabel,           s({bg:GREEN_L, bold:true}));
+        merge(R,1,R,3);
+        cell(1,R, "✅ ИТОГО за день",  s({bg:GREEN_L, bold:true, align:"center", color:GREEN_D}));
+        cell(4,R, +d.final.toFixed(2), s({bg:GREEN_L, bold:true, align:"right",  color:GREEN_D}));
+        R++;
+
+        // Разделитель
+        emptyRow(R, WHITE); R++;
+        rowIdx++;
+    });
+
+    // Итоговая строка таблицы
+    merge(R,0,R,3);
+    cell(0,R, "💰 ИТОГО ЗА МЕСЯЦ", s({bg:RED, color:WHITE, bold:true, sz:12, align:"center"}));
+    cell(4,R, +totalAfter.toFixed(2), s({bg:RED, color:WHITE, bold:true, sz:12, align:"right"}));
+    R++;
+
+    // Диапазон листа
+    const range = {s:{r:0,c:0}, e:{r:R,c:4}};
+    ws1["!ref"] = XLSX.utils.encode_range(range);
+    ws1["!merges"] = merges;
+    ws1["!cols"] = [{wch:28},{wch:26},{wch:14},{wch:14},{wch:18}];
+    ws1["!rows"] = [{hpt:40},{hpt:28}]; // высота первых двух строк
+
+    // ============ ЛИСТ 2: АНАЛИТИКА ============
+    const ws2 = {};
+    const merges2 = [];
+    let R2 = 0;
+
+    function cell2(c,r,v,style){
+        ws2[XLSX.utils.encode_cell({c,r})] = {v, t:typeof v==='number'?'n':'s', s:style};
+    }
+    function merge2(r1,c1,r2,c2){ merges2.push({s:{r:r1,c:c1},e:{r:r2,c:c2}}); }
+
+    // Шапка
+    merge2(R2,0,R2,4);
+    cell2(0,R2,"📊 АНАЛИТИКА — "+monthName+" "+year, s({bold:true,sz:14,color:WHITE,bg:RED,align:"center"}));
+    R2++;
+
+    merge2(R2,0,R2,4);
+    cell2(0,R2,"",s({bg:RED})); R2++;
+
+    // Статистика по сменам
+    merge2(R2,0,R2,4);
+    cell2(0,R2,"🗓 СТАТИСТИКА ПО СМЕНАМ",s({bold:true,sz:11,color:WHITE,bg:GREEN_D,align:"center"}));
+    R2++;
+
+    const shiftRows = [
+        ["🟢 Рабочих смен",        workShifts,                              GREEN_L],
+        ["🔵 Дополнительных смен", extraShifts,                             BLUE_L],
+        ["📊 Всего смен",           worked,                                  WHITE],
+        ["💵 Доход от допсмен",     rub(extraIncome),                       BLUE_L],
+    ];
+    shiftRows.forEach(([label, val, bg])=>{
+        cell2(0,R2, label, s({bold:true, bg}));
+        merge2(R2,1,R2,4);
+        cell2(1,R2, val,   s({align:"right", bg, bold:true}));
+        R2++;
+    });
+
+    merge2(R2,0,R2,4); cell2(0,R2,"",s({bg:GRAY_L})); R2++;
+
+    // Сводная таблица по типам пиков
+    merge2(R2,0,R2,4);
+    cell2(0,R2,"📦 СВОДКА ПО СКЛАДАМ",s({bold:true,sz:11,color:WHITE,bg:BLUE_D,align:"center"}));
+    R2++;
+
+    cell2(0,R2,"Склад",    s({bold:true,bg:GRAY_D,color:WHITE}));
+    cell2(1,R2,"Пиков",   s({bold:true,bg:GRAY_D,color:WHITE,align:"center"}));
+    merge2(R2,2,R2,3);
+    cell2(2,R2,"Сумма",   s({bold:true,bg:GRAY_D,color:WHITE,align:"center"}));
+    cell2(4,R2,"Доля, %", s({bold:true,bg:GRAY_D,color:WHITE,align:"center"}));
+    R2++;
+
+    const totalPickSum = Object.values(pickTotals).reduce((a,p)=>a+p.sum,0);
+    let pi2 = 0;
+    for(const type in pickTotals){
+        const p = pickTotals[type];
+        const pct = totalPickSum > 0 ? ((p.sum/totalPickSum)*100).toFixed(1)+"%" : "—";
+        const bg2 = pi2%2===0 ? WHITE : GRAY_L;
+        cell2(0,R2, type,             s({bg:bg2}));
+        cell2(1,R2, p.qty,            s({align:"center", bg:bg2}));
+        merge2(R2,2,R2,3);
+        cell2(2,R2, +p.sum.toFixed(2),s({align:"right",  bg:bg2, bold:true}));
+        cell2(4,R2, pct,              s({align:"center",  bg:bg2}));
+        R2++; pi2++;
+    }
+
+    // Итог пики
+    cell2(0,R2,"ИТОГО пики",          s({bold:true,bg:BLUE_L}));
+    cell2(1,R2,Object.values(pickTotals).reduce((a,p)=>a+p.qty,0), s({align:"center",bg:BLUE_L,bold:true}));
+    merge2(R2,2,R2,3);
+    cell2(2,R2, +totalPickSum.toFixed(2), s({align:"right",bg:BLUE_L,bold:true,color:BLUE_D}));
+    cell2(4,R2,"100%", s({align:"center",bg:BLUE_L,bold:true}));
+    R2++;
+
+    merge2(R2,0,R2,4); cell2(0,R2,"",s({bg:GRAY_L})); R2++;
+
+    // Динамика по дням
+    merge2(R2,0,R2,4);
+    cell2(0,R2,"📅 ДИНАМИКА ЗАРАБОТКА ПО ДНЯМ",s({bold:true,sz:11,color:WHITE,bg:GREEN_D,align:"center"}));
+    R2++;
+
+    cell2(0,R2,"Дата",       s({bold:true,bg:GRAY_D,color:WHITE}));
+    cell2(1,R2,"До НДФЛ",   s({bold:true,bg:GRAY_D,color:WHITE,align:"right"}));
+    cell2(2,R2,"НДФЛ",      s({bold:true,bg:GRAY_D,color:WHITE,align:"right"}));
+    cell2(3,R2,"После НДФЛ",s({bold:true,bg:GRAY_D,color:WHITE,align:"right"}));
+    cell2(4,R2,"Часов",     s({bold:true,bg:GRAY_D,color:WHITE,align:"center"}));
+    R2++;
+
+    monthData.forEach((d,i)=>{
+        const bg3 = i%2===0 ? WHITE : GRAY_L;
+        const ndfl = d.total - d.final;
+        const cal = calendar.find(c => c.date === d.date);
+        const isExtra = d.isExtra || (cal && cal.type === 'extra') || false;
+        const rowBg = isExtra ? BLUE_L : bg3;
+        cell2(0,R2, fmt(d.date) + (isExtra ? " ⭐" : ""), s({bg:rowBg}));
+        cell2(1,R2, +d.total.toFixed(2), s({align:"right",bg:rowBg}));
+        cell2(2,R2, +ndfl.toFixed(2),    s({align:"right",bg:RED_LIGHT}));
+        cell2(3,R2, +d.final.toFixed(2), s({align:"right",bg:rowBg,bold:true,color:GREEN_D}));
+        cell2(4,R2, d.hours,             s({align:"center",bg:rowBg}));
+        R2++;
+    });
+
+    // Итоговая строка аналитики
+    cell2(0,R2,"ИТОГО",                 s({bold:true,bg:GREEN_D,color:WHITE}));
+    cell2(1,R2, +totalBefore.toFixed(2),s({align:"right",bg:GREEN_D,color:WHITE,bold:true}));
+    cell2(2,R2, +ndflTotal.toFixed(2),  s({align:"right",bg:GREEN_D,color:WHITE,bold:true}));
+    cell2(3,R2, +totalAfter.toFixed(2), s({align:"right",bg:GREEN_D,color:WHITE,bold:true}));
+    cell2(4,R2, totalHours,             s({align:"center",bg:GREEN_D,color:WHITE,bold:true}));
+    R2++;
+
+    const range2 = {s:{r:0,c:0}, e:{r:R2,c:4}};
+    ws2["!ref"] = XLSX.utils.encode_range(range2);
+    ws2["!merges"] = merges2;
+    ws2["!cols"] = [{wch:28},{wch:16},{wch:16},{wch:16},{wch:10}];
+
+    // ============ СБОРКА И СКАЧИВАНИЕ ============
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws1, "Расчётный лист");
+    XLSX.utils.book_append_sheet(wb, ws2, "Аналитика");
+
+    const fileName = `Магнит_Зарплата_${monthName}_${year}.xlsx`;
+    const base64 = XLSX.write(wb, {bookType:"xlsx", type:"base64"});
+
+    // Нативный Android — сохраняем через Kotlin bridge
+    if(typeof Android !== 'undefined' && Android.isAvailable()){
+        Android.saveExcel(base64, fileName);
+        return;
+    }
+
+    // Браузер — через data-URI ссылку
+    const dataUri = "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," + base64;
+    const a = document.createElement("a");
+    a.href = dataUri;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    const linkBlock = document.getElementById("exportLink");
+    const anchor    = document.getElementById("exportAnchor");
+    anchor.href     = dataUri;
+    anchor.download = fileName;
+    anchor.textContent = "💾 " + fileName;
+    linkBlock.style.display = "block";
+    linkBlock.scrollIntoView({behavior:"smooth", block:"center"});
+}
+
+    // ГОДА
+    let ySel=document.getElementById('yearSelect');
+
+    for(let y=2025;y<=2035;y++){
+
+        let o=document.createElement('option');
+
+        o.value=y;
+        o.text=y;
+
+        ySel.appendChild(o);
+    }
+
+    // ГОДА ДЛЯ КАЛЕНДАРЯ
+    let calYear=document.getElementById('calendarYear');
+
+    for(let y=2025;y<=2100;y++){
+
+        let o=document.createElement('option');
+
+        o.value=y;
+        o.text=y;
+
+        calYear.appendChild(o);
+    }
+
+    // ТЕКУЩИЙ МЕСЯЦ И ГОД
+    let now=new Date();
+
+    document.getElementById('calendarYear').value=
+    now.getFullYear();
+
+    document.getElementById('calendarMonth').value=
+    now.getMonth();
+
+
+    function clearSelectedDay(){
+
+    let date =
+    document.getElementById('deleteDate').value;
+
+    let arr = JSON.parse(
+        localStorage.getItem('days')
+    ) || [];
+
+    arr = arr.filter(d => d.date !== date);
+
+    localStorage.setItem(
+        'days',
+        JSON.stringify(arr)
+    );
+
+    loadReports();
+}
+
+// ЭКСПОРТ CSV — через буфер обмена (работает в WebView)
+function openReportPage(){
+    const data      = JSON.parse(localStorage.getItem('days'))     || [];
+    const calendar  = JSON.parse(localStorage.getItem('calendar')) || [];
+    const year      = +document.getElementById('yearSelect').value;
+    const month     = +document.getElementById('monthSelect').value;
+    const monthNames= ["Январь","Февраль","Март","Апрель","Май","Июнь",
+                       "Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
+    const monthName = monthNames[month];
+
+    const monthData = data.filter(d => {
+        const dd = new Date(d.date);
+        return dd.getFullYear() === year && dd.getMonth() === month;
+    }).sort((a,b) => a.date.localeCompare(b.date));
+
+    function fmt(d){ const p=d.split("-"); return p[2]+"."+p[1]+"."+p[0]; }
+    function rub(n){ return n.toFixed(2)+" ₽"; }
+    function pct(a,b){ return b>0?((a/b)*100).toFixed(1)+"%":"—"; }
+
+    let totalBefore=0, totalAfter=0, totalHours=0, totalCarts=0;
+    const pickTotals={};
+    let worked=0, workShifts=0, extraShifts=0, extraIncome=0;
+    monthData.forEach(d=>{
+        totalBefore+=d.total; totalAfter+=d.final;
+        totalHours+=d.hours;  totalCarts+=d.carts;
+        const cal=calendar.find(c=>c.date===d.date);
+        const isExtra = d.isExtra || (cal && cal.type === 'extra') || false;
+        if(cal&&(cal.type==='work'||cal.type==='extra')) worked++;
+        if(isExtra){ extraShifts++; extraIncome+=d.final; } else { workShifts++; }
+        d.picks.forEach(p=>{
+            if(!pickTotals[p.type]) pickTotals[p.type]={qty:0,sum:0};
+            pickTotals[p.type].qty+=p.qty;
+            pickTotals[p.type].sum+=p.sum;
+        });
+    });
+    const workDays=calendar.filter(c=>{
+        const d=new Date(c.date);
+        return d.getFullYear()===year&&d.getMonth()===month&&(c.type==='work'||c.type==='extra');
+    }).length;
+    const ndflTotal=totalBefore-totalAfter;
+    const avgDay=worked?(totalAfter/worked):0;
+    const forecast=avgDay*workDays;
+    const forecastBefore=worked?forecast/(1-settings.ndfl):0;
+    const avgHours=worked?(totalHours/worked):0;
+    const avgCarts=worked?(totalCarts/worked):0;
+    let bestDay=null,bestVal=0;
+    monthData.forEach(d=>{if(d.final>bestVal){bestVal=d.final;bestDay=d.date;}});
+    const totalPickSum=Object.values(pickTotals).reduce((a,p)=>a+p.sum,0);
+    const totalPickQty=Object.values(pickTotals).reduce((a,p)=>a+p.qty,0);
+
+    // --- Стили для блоков ---
+    const blockStyle='background:white;border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.08);';
+    const titleStyle=(bg)=>`background:${bg};color:white;font-weight:bold;font-size:14px;padding:10px 14px;border-radius:10px;margin:-16px -16px 14px;`;
+    const rowStyle='display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f0f0f0;font-size:15px;';
+    const thStyle='background:#424242;color:white;padding:9px 8px;text-align:left;font-size:13px;';
+    const tdStyle='padding:8px;border-bottom:1px solid #eee;font-size:13px;vertical-align:middle;';
+    const tdNum=tdStyle+'text-align:right;';
+
+    function infoRow(label, val, valStyle=''){
+        return `<div style="${rowStyle}"><span>${label}</span><span style="font-weight:bold;${valStyle}">${val}</span></div>`;
+    }
+    function badge(color,text){ return `<span style="background:${color};border-radius:6px;padding:2px 8px;">${text}</span>`; }
+
+    // --- ВКЛАДКА 1: Сводка ---
+    let rp1 = '';
+
+    rp1 += `<div style="${blockStyle}"><div style="${titleStyle('#616161')}">📋 Общая информация</div>`;
+    rp1 += infoRow('📅 Период', `${monthName} ${year}`);
+    rp1 += infoRow('🗓 Рабочих дней', workDays);
+    rp1 += infoRow('✅ Отработано смен', worked);
+    rp1 += infoRow('🟢 Рабочих смен', workShifts);
+    rp1 += infoRow('🔵 Допсмен', badge('#e3f2fd',`<span style="color:#1565c0">${extraShifts}</span>`));
+    rp1 += infoRow('⏱ Всего часов', totalHours);
+    rp1 += infoRow('💰 До НДФЛ', badge('#e8f5e9',`<span style="color:#2e7d32">${rub(totalBefore)}</span>`));
+    rp1 += infoRow(`🧾 НДФЛ (${Math.round(settings.ndfl*100)}%)`, badge('#fdecea',`<span style="color:#e30613">${rub(ndflTotal)}</span>`));
+    rp1 += infoRow('✨ После НДФЛ', badge('#e8f5e9',`<span style="color:#2e7d32;font-weight:bold">${rub(totalAfter)}</span>`));
+    rp1 += infoRow('💵 Доход от допсмен', badge('#e3f2fd',`<span style="color:#1565c0">${rub(extraIncome)}</span>`));
+    rp1 += infoRow('🔮 Прогноз', badge('#fff8e1',`<span style="color:#e65100">${rub(forecast)}</span>`));
+    rp1 += '</div>';
+
+    rp1 += `<div style="${blockStyle}"><div style="${titleStyle('#1565c0')}">📦 Производственные показатели</div>`;
+    for(const type in pickTotals){
+        const p=pickTotals[type];
+        rp1 += infoRow(type, `${p.qty} пик — <span style="color:#1565c0;font-weight:bold">${rub(p.sum)}</span>`);
+    }
+    rp1 += infoRow('🚛 Телеги', `${totalCarts} шт — <span style="color:#1565c0;font-weight:bold">${rub(totalCarts*settings.cartRate)}</span>`);
+    rp1 += infoRow('⏱ Часы', `${totalHours} ч — <span style="color:#1565c0;font-weight:bold">${rub(totalHours*settings.hourRate)}</span>`);
+    rp1 += '</div>';
+
+    rp1 += `<div style="${blockStyle}"><div style="${titleStyle('#2e7d32')}">💰 Финансовые итоги</div>`;
+    rp1 += infoRow('📊 Средний заработок/день', badge('#fff8e1',`<span style="color:#e65100">${rub(avgDay)}</span>`));
+    rp1 += infoRow('⏱ Среднее часов/день', `${avgHours.toFixed(1)} ч`);
+    rp1 += infoRow('🚛 Средние телеги/день', `${avgCarts.toFixed(1)} шт`);
+    rp1 += infoRow('🏆 Лучший день', `<span style="color:#2e7d32">${bestDay?fmt(bestDay)+' — '+rub(bestVal):'—'}</span>`);
+    rp1 += infoRow('🔮 Прогноз до НДФЛ', badge('#e8f5e9',`<span style="color:#2e7d32">${rub(forecastBefore)}</span>`));
+    rp1 += infoRow('✅ Прогноз после НДФЛ', badge('#e8f5e9',`<span style="color:#2e7d32;font-weight:bold">${rub(forecast)}</span>`));
+    rp1 += '</div>';
+
+    // --- ВКЛАДКА 2: По дням ---
+    let dayRows='';
+    monthData.forEach((d,i)=>{
+        const bg=i%2===0?'#ffffff':'#f9f9f9';
+        const cal=calendar.find(c=>c.date===d.date);
+        const isExtra = d.isExtra || (cal && cal.type === 'extra') || false;
+        const hrRate=(d.holiday||isExtra)?settings.hourRate*2:settings.hourRate;
+        const highlightBg = isExtra ? '#e3f2fd' : (d.holiday ? '#fff8e1' : bg);
+        const dateLabel = fmt(d.date) + (isExtra ? ' ⭐' : '');
+        d.picks.forEach(p=>{
+            dayRows+=`<tr style="background:${highlightBg}">
+                <td style="${tdStyle}">${dateLabel}</td>
+                <td style="${tdStyle}">${p.type}</td>
+                <td style="${tdNum}">${p.qty}</td>
+                <td style="${tdNum}">${settings.rates[p.type]||0}</td>
+                <td style="${tdNum}">${p.sum.toFixed(2)}</td></tr>`;
+        });
+        dayRows+=`<tr style="background:${highlightBg}">
+            <td style="${tdStyle}">${dateLabel}</td>
+            <td style="${tdStyle}">⏱ Часы${isExtra?' ⭐(допсмена ×2)':d.holiday?' ×2':''}</td>
+            <td style="${tdNum}">${d.hours}</td>
+            <td style="${tdNum}">${hrRate}</td>
+            <td style="${tdNum}">${(d.hours*hrRate).toFixed(2)}</td></tr>`;
+        dayRows+=`<tr style="background:${bg}">
+            <td style="${tdStyle}">${dateLabel}</td>
+            <td style="${tdStyle}">🚛 Телеги</td>
+            <td style="${tdNum}">${d.carts}</td>
+            <td style="${tdNum}">${settings.cartRate}</td>
+            <td style="${tdNum}">${(d.carts*settings.cartRate).toFixed(2)}</td></tr>`;
+        dayRows+=`<tr style="background:#e8f5e9;font-weight:bold;color:#2e7d32">
+            <td style="${tdStyle}">${dateLabel}</td>
+            <td style="${tdStyle}" colspan="3">✅ Итого за день</td>
+            <td style="${tdNum}">${d.final.toFixed(2)}</td></tr>`;
+        dayRows+=`<tr><td colspan="5" style="padding:3px;background:#f5f5f5;"></td></tr>`;
+    });
+
+    let rp2 = `<div style="${blockStyle}"><div style="${titleStyle('#616161')}">📅 Детализация по дням</div>
+        <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;">
+        <tr>
+            <th style="${thStyle}">Дата</th>
+            <th style="${thStyle}">Тип</th>
+            <th style="${thStyle}text-align:right">Кол-во</th>
+            <th style="${thStyle}text-align:right">Тариф</th>
+            <th style="${thStyle}text-align:right">Сумма</th>
+        </tr>
+        ${dayRows}
+        <tr style="background:#e30613;color:white;font-weight:bold;font-size:15px;">
+            <td style="padding:10px" colspan="4">💰 ИТОГО ЗА МЕСЯЦ</td>
+            <td style="padding:10px;text-align:right">${rub(totalAfter)}</td>
+        </tr>
+        </table></div></div>`;
+
+    // --- ВКЛАДКА 3: Аналитика ---
+    let pickRows='';
+    for(const type in pickTotals){
+        const p=pickTotals[type];
+        pickRows+=`<tr>
+            <td style="${tdStyle}">${type}</td>
+            <td style="${tdNum}">${p.qty}</td>
+            <td style="${tdNum}">${p.sum.toFixed(2)}</td>
+            <td style="${tdNum}">${pct(p.sum,totalPickSum)}</td></tr>`;
+    }
+    pickRows+=`<tr style="background:#e3f2fd;font-weight:bold;color:#1565c0">
+        <td style="${tdStyle}">ИТОГО пики</td>
+        <td style="${tdNum}">${totalPickQty}</td>
+        <td style="${tdNum}">${totalPickSum.toFixed(2)}</td>
+        <td style="${tdNum}">100%</td></tr>`;
+
+    let dynRows='';
+    monthData.forEach((d,i)=>{
+        const bg=i%2===0?'#ffffff':'#f9f9f9';
+        const cal=calendar.find(c=>c.date===d.date);
+        const isExtra = d.isExtra || (cal && cal.type === 'extra') || false;
+        const rowBg = isExtra ? '#e3f2fd' : bg;
+        const ndfl=d.total-d.final;
+        dynRows+=`<tr style="background:${rowBg}">
+            <td style="${tdStyle}">${fmt(d.date)}${isExtra?' ⭐':''}</td>
+            <td style="${tdNum}">${d.total.toFixed(2)}</td>
+            <td style="${tdNum};color:#e30613">${ndfl.toFixed(2)}</td>
+            <td style="${tdNum};color:#2e7d32;font-weight:bold">${d.final.toFixed(2)}</td>
+            <td style="${tdNum}">${d.hours}</td>
+            <td style="${tdNum}">${d.carts}</td></tr>`;
+    });
+    dynRows+=`<tr style="background:#e8f5e9;font-weight:bold">
+        <td style="${tdStyle}">ИТОГО</td>
+        <td style="${tdNum}">${totalBefore.toFixed(2)}</td>
+        <td style="${tdNum};color:#e30613">${ndflTotal.toFixed(2)}</td>
+        <td style="${tdNum};color:#2e7d32">${totalAfter.toFixed(2)}</td>
+        <td style="${tdNum}">${totalHours}</td>
+        <td style="${tdNum}">${totalCarts}</td></tr>`;
+
+    let rp3 = '';
+
+    rp3 += `<div style="${blockStyle}"><div style="${titleStyle('#2e7d32')}">🗓 Статистика по сменам</div>`;
+    rp3 += infoRow('🟢 Рабочих смен', workShifts);
+    rp3 += infoRow('🔵 Дополнительных смен', badge('#e3f2fd',`<span style="color:#1565c0">${extraShifts}</span>`));
+    rp3 += infoRow('📊 Всего смен', worked);
+    rp3 += infoRow('💵 Доход от допсмен', badge('#e3f2fd',`<span style="color:#1565c0;font-weight:bold">${rub(extraIncome)}</span>`));
+    rp3 += '</div>';
+
+    rp3 += `<div style="${blockStyle}"><div style="${titleStyle('#1565c0')}">📦 Сводка по складам</div>
+        <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;">
+        <tr>
+            <th style="${thStyle}">Склад</th>
+            <th style="${thStyle}text-align:right">Пиков</th>
+            <th style="${thStyle}text-align:right">Сумма</th>
+            <th style="${thStyle}text-align:right">Доля</th>
+        </tr>${pickRows}</table></div></div>`;
+
+    rp3 += `<div style="${blockStyle}"><div style="${titleStyle('#2e7d32')}">📅 Динамика по дням</div>
+        <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;">
+        <tr>
+            <th style="${thStyle}">Дата</th>
+            <th style="${thStyle}text-align:right">До НДФЛ</th>
+            <th style="${thStyle}text-align:right">НДФЛ</th>
+            <th style="${thStyle}text-align:right">После</th>
+            <th style="${thStyle}text-align:right">Ч</th>
+            <th style="${thStyle}text-align:right">Т</th>
+        </tr>${dynRows}</table></div></div>`;
+
+    rp3 += `<div style="${blockStyle}"><div style="${titleStyle('#616161')}">📈 Средние показатели</div>`;
+    rp3 += infoRow('Средний заработок/день', badge('#fff8e1',`<span style="color:#e65100">${rub(avgDay)}</span>`));
+    rp3 += infoRow('Среднее часов/день', `${avgHours.toFixed(1)} ч`);
+    rp3 += infoRow('Средние телеги/день', `${avgCarts.toFixed(1)} шт`);
+    rp3 += infoRow('Лучший день', `<span style="color:#2e7d32">${bestDay?fmt(bestDay)+' — '+rub(bestVal):'—'}</span>`);
+    rp3 += '</div>';
+
+    // --- Рендерим в страницу ---
+    document.getElementById('rp1').innerHTML = rp1;
+    document.getElementById('rp2').innerHTML = rp2;
+    document.getElementById('rp3').innerHTML = rp3;
+    document.getElementById('reportPageTitle').textContent = `Отчёт — ${monthName} ${year}`;
+
+    // Сбрасываем на первую вкладку
+    document.querySelectorAll('.rp-tab-content').forEach(t=>t.style.display='none');
+    document.getElementById('rp1').style.display='block';
+    document.querySelectorAll('.rp-tab').forEach(b=>{
+        b.style.background='#e0e0e0'; b.style.color='#333';
+    });
+    document.querySelectorAll('.rp-tab')[0].style.background='#e30613';
+    document.querySelectorAll('.rp-tab')[0].style.color='white';
+
+    // Скрываем всё, показываем страницу отчёта
+    document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+    document.getElementById('reportPage').classList.remove('hidden');
+    document.querySelector('.bottom-nav').style.display='none';
+    window.scrollTo(0,0);
+}
+
+function closeReportPage(){
+    document.getElementById('reportPage').classList.add('hidden');
+    document.getElementById('reports').classList.remove('hidden');
+    document.querySelector('.bottom-nav').style.display='flex';
+    window.scrollTo(0,0);
+}
+
+function showRpTab(id, btn){
+    document.querySelectorAll('.rp-tab-content').forEach(t=>t.style.display='none');
+    document.getElementById(id).style.display='block';
+    document.querySelectorAll('.rp-tab').forEach(b=>{
+        b.style.background='#e0e0e0'; b.style.color='#333';
+    });
+    btn.style.background='#e30613';
+    btn.style.color='white';
+}
+
+
+
+function exportCSV(){
+    const data      = JSON.parse(localStorage.getItem('days'))     || [];
+    const calendar  = JSON.parse(localStorage.getItem('calendar')) || [];
+    const year      = +document.getElementById('yearSelect').value;
+    const month     = +document.getElementById('monthSelect').value;
+    const monthNames= ["Январь","Февраль","Март","Апрель","Май","Июнь",
+                       "Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
+    const monthName = monthNames[month];
+
+    const monthData = data.filter(d => {
+        const dd = new Date(d.date);
+        return dd.getFullYear() === year && dd.getMonth() === month;
+    }).sort((a,b) => a.date.localeCompare(b.date));
+
+    function fmt(d){ const p=d.split("-"); return p[2]+"."+p[1]+"."+p[0]; }
+    function rub(n){ return n.toFixed(2)+" ₽"; }
+
+    let totalBefore=0, totalAfter=0, totalHours=0, totalCarts=0;
+    const pickTotals={};
+    let worked=0, workShifts=0, extraShifts=0, extraIncome=0;
+    monthData.forEach(d=>{
+        totalBefore+=d.total; totalAfter+=d.final;
+        totalHours+=d.hours;  totalCarts+=d.carts;
+        const cal=calendar.find(c=>c.date===d.date);
+        const isExtra = d.isExtra || (cal && cal.type === 'extra') || false;
+        if(cal&&(cal.type==='work'||cal.type==='extra')) worked++;
+        if(isExtra){ extraShifts++; extraIncome+=d.final; } else { workShifts++; }
+        d.picks.forEach(p=>{
+            if(!pickTotals[p.type]) pickTotals[p.type]={qty:0,sum:0};
+            pickTotals[p.type].qty+=p.qty;
+            pickTotals[p.type].sum+=p.sum;
+        });
+    });
+    const workDays=calendar.filter(c=>{
+        const d=new Date(c.date);
+        return d.getFullYear()===year&&d.getMonth()===month&&(c.type==='work'||c.type==='extra');
+    }).length;
+    const ndflTotal=totalBefore-totalAfter;
+    const avgDay=worked?(totalAfter/worked):0;
+    const forecast=avgDay*workDays;
+    const forecastBefore=worked?forecast/(1-settings.ndfl):0;
+    let bestDay=null,bestVal=0;
+    monthData.forEach(d=>{if(d.final>bestVal){bestVal=d.final;bestDay=d.date;}});
+
+    const TAB="\t", NL="\n";
+    let csv="";
+
+    // ── Заголовок ──
+    csv+="РАСЧЁТНЫЙ ЛИСТ МАГНИТ"+NL;
+    csv+=monthName+" "+year+NL+NL;
+
+    // ── Общая информация ──
+    csv+="ОБЩАЯ ИНФОРМАЦИЯ"+NL;
+    csv+="Период"+TAB+monthName+" "+year+NL;
+    csv+="Рабочих дней"+TAB+workDays+NL;
+    csv+="Отработано смен"+TAB+worked+NL;
+    csv+="Рабочих смен"+TAB+workShifts+NL;
+    csv+="Дополнительных смен"+TAB+extraShifts+NL;
+    csv+="Всего часов"+TAB+totalHours+NL;
+    csv+="До НДФЛ"+TAB+rub(totalBefore)+NL;
+    csv+="НДФЛ ("+Math.round(settings.ndfl*100)+"%)"+TAB+rub(ndflTotal)+NL;
+    csv+="После НДФЛ"+TAB+rub(totalAfter)+NL;
+    csv+="Доход от допсмен"+TAB+rub(extraIncome)+NL;
+    csv+="Прогноз"+TAB+rub(forecast)+NL+NL;
+
+    // ── Производственные показатели ──
+    csv+="ПРОИЗВОДСТВЕННЫЕ ПОКАЗАТЕЛИ"+NL;
+    csv+="Тип"+TAB+"Количество"+TAB+"Сумма"+NL;
+    for(const type in pickTotals){
+        csv+=type+TAB+pickTotals[type].qty+" пик"+TAB+rub(pickTotals[type].sum)+NL;
+    }
+    csv+="Телеги"+TAB+totalCarts+" шт"+TAB+rub(totalCarts*settings.cartRate)+NL;
+    csv+="Часы"+TAB+totalHours+" ч"+TAB+rub(totalHours*settings.hourRate)+NL+NL;
+
+    // ── Финансовые итоги ──
+    csv+="ФИНАНСОВЫЕ ИТОГИ"+NL;
+    csv+="Средний заработок/день"+TAB+rub(avgDay)+NL;
+    csv+="Лучший день"+TAB+(bestDay?fmt(bestDay)+" — "+rub(bestVal):"—")+NL;
+    csv+="Прогноз до НДФЛ"+TAB+rub(forecastBefore)+NL;
+    csv+="Прогноз после НДФЛ"+TAB+rub(forecast)+NL+NL;
+
+    // ── Детализация по дням ──
+    csv+="ДЕТАЛИЗАЦИЯ ПО ДНЯМ"+NL;
+    csv+="Дата"+TAB+"Тип"+TAB+"Количество"+TAB+"Тариф"+TAB+"Сумма"+NL;
+    monthData.forEach(d=>{
+        const cal=calendar.find(c=>c.date===d.date);
+        const isExtra = d.isExtra || (cal && cal.type === 'extra') || false;
+        const dateLabel = fmt(d.date) + (isExtra ? " ⭐" : "");
+        d.picks.forEach(p=>{
+            csv+=dateLabel+TAB+p.type+TAB+p.qty+TAB+settings.rates[p.type]+TAB+p.sum.toFixed(2)+NL;
+        });
+        const hrRate=(d.holiday||isExtra)?settings.hourRate*2:settings.hourRate;
+        const hrLabel = isExtra ? "Часы ⭐(допсмена ×2)" : d.holiday ? "Часы ×2" : "Часы";
+        csv+=dateLabel+TAB+hrLabel+TAB+d.hours+TAB+hrRate+TAB+(d.hours*hrRate).toFixed(2)+NL;
+        csv+=dateLabel+TAB+"Телеги"+TAB+d.carts+TAB+settings.cartRate+TAB+(d.carts*settings.cartRate).toFixed(2)+NL;
+        csv+=dateLabel+TAB+"ИТОГО за день"+TAB+""+TAB+""+TAB+d.final.toFixed(2)+NL;
+        csv+=NL;
+    });
+
+    csv+="ИТОГО ЗА МЕСЯЦ"+TAB+""+TAB+""+TAB+""+TAB+totalAfter.toFixed(2)+NL;
+    csv+=NL+NL;
+
+    // ── Аналитика ──
+    csv+="========== АНАЛИТИКА =========="+NL+NL;
+
+    // Статистика по сменам
+    csv+="СТАТИСТИКА ПО СМЕНАМ"+NL;
+    csv+="Рабочих смен"+TAB+workShifts+NL;
+    csv+="Дополнительных смен"+TAB+extraShifts+NL;
+    csv+="Всего смен"+TAB+worked+NL;
+    csv+="Доход от допсмен"+TAB+rub(extraIncome)+NL+NL;
+
+    // Сводка по складам
+    csv+="СВОДКА ПО СКЛАДАМ"+NL;
+    csv+="Склад"+TAB+"Пиков"+TAB+"Сумма"+TAB+"Доля %"+NL;
+    const totalPickSum=Object.values(pickTotals).reduce((a,p)=>a+p.sum,0);
+    for(const type in pickTotals){
+        const p=pickTotals[type];
+        const pct=totalPickSum>0?((p.sum/totalPickSum)*100).toFixed(1)+"%":"—";
+        csv+=type+TAB+p.qty+TAB+p.sum.toFixed(2)+TAB+pct+NL;
+    }
+    const totalPickQty=Object.values(pickTotals).reduce((a,p)=>a+p.qty,0);
+    csv+="ИТОГО пики"+TAB+totalPickQty+TAB+totalPickSum.toFixed(2)+TAB+"100%"+NL+NL;
+
+    // Динамика по дням
+    csv+="ДИНАМИКА ЗАРАБОТКА ПО ДНЯМ"+NL;
+    csv+="Дата"+TAB+"До НДФЛ"+TAB+"НДФЛ"+TAB+"После НДФЛ"+TAB+"Часов"+TAB+"Телег"+NL;
+    monthData.forEach(d=>{
+        const cal=calendar.find(c=>c.date===d.date);
+        const isExtra = d.isExtra || (cal && cal.type === 'extra') || false;
+        const ndfl=(d.total-d.final).toFixed(2);
+        csv+=fmt(d.date)+(isExtra?" ⭐":"")+TAB+d.total.toFixed(2)+TAB+ndfl+TAB+d.final.toFixed(2)+TAB+d.hours+TAB+d.carts+NL;
+    });
+    csv+="ИТОГО"+TAB+totalBefore.toFixed(2)+TAB+ndflTotal.toFixed(2)+TAB+totalAfter.toFixed(2)+TAB+totalHours+TAB+totalCarts+NL+NL;
+
+    // Средние показатели
+    const avgHours=worked?(totalHours/worked):0;
+    const avgCarts=worked?(totalCarts/worked):0;
+    csv+="СРЕДНИЕ ПОКАЗАТЕЛИ"+NL;
+    csv+="Средний заработок/день"+TAB+rub(avgDay)+NL;
+    csv+="Среднее часов/день"+TAB+avgHours.toFixed(1)+" ч"+NL;
+    csv+="Средние телеги/день"+TAB+avgCarts.toFixed(1)+" шт"+NL;
+    csv+="Лучший день"+TAB+(bestDay?fmt(bestDay)+" — "+rub(bestVal):"—")+NL;
+
+    // Показываем результат
+    const resultBlock = document.getElementById('csvResult');
+    const textArea    = document.getElementById('csvText');
+    textArea.value    = csv;
+    resultBlock.style.display = 'block';
+    resultBlock.scrollIntoView({behavior:'smooth', block:'start'});
+
+    // Нативный Android — используем системное «Поделиться»
+    if(typeof Android !== 'undefined' && Android.isAvailable()){
+        Android.shareText(csv, `Расчётный лист Магнит — ${monthName} ${year}`);
+        return;
+    }
+
+    // Браузер — копируем в буфер
+    if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(csv).catch(()=>{
+            textArea.select();
+            document.execCommand('copy');
+        });
+    } else {
+        textArea.select();
+        document.execCommand('copy');
+    }
+}
 </script>
-
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 </body>
 </html>
