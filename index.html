@@ -2,9 +2,20 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
     <title>Зарплата Магнит</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#e30613">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Магнит ЗП">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 
     <style>
         body{
@@ -1849,30 +1860,45 @@ function renderCalendar(){
     XLSX.utils.book_append_sheet(wb, ws2, "Аналитика");
 
     const fileName = `Магнит_Зарплата_${monthName}_${year}.xlsx`;
-    const base64 = XLSX.write(wb, {bookType:"xlsx", type:"base64"});
 
-    // Нативный Android — сохраняем через Kotlin bridge
+    // Нативный Android (WebView + Kotlin bridge)
     if(typeof Android !== 'undefined' && Android.isAvailable()){
+        const base64 = XLSX.write(wb, {bookType:"xlsx", type:"base64"});
         Android.saveExcel(base64, fileName);
         return;
     }
 
-    // Браузер — через data-URI ссылку
-    const dataUri = "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," + base64;
+    // PWA / браузер — генерируем Blob и скачиваем
+    const wbArray = XLSX.write(wb, {bookType:"xlsx", type:"array"});
+    const blob = new Blob([wbArray], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    });
+
+    // Пробуем Web Share API с файлом (работает в PWA на Android через HTTPS)
+    if(navigator.canShare && navigator.canShare({files: [new File([blob], fileName)]})){
+        const file = new File([blob], fileName, {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        });
+        navigator.share({
+            files: [file],
+            title: `Расчётный лист Магнит — ${monthName} ${year}`
+        }).catch(() => downloadBlob(blob, fileName));
+        return;
+    }
+
+    // Запасной вариант — обычное скачивание (работает на HTTPS)
+    downloadBlob(blob, fileName);
+}
+
+function downloadBlob(blob, fileName){
+    const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = dataUri;
+    a.href = url;
     a.download = fileName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-
-    const linkBlock = document.getElementById("exportLink");
-    const anchor    = document.getElementById("exportAnchor");
-    anchor.href     = dataUri;
-    anchor.download = fileName;
-    anchor.textContent = "💾 " + fileName;
-    linkBlock.style.display = "block";
-    linkBlock.scrollIntoView({behavior:"smooth", block:"center"});
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
     // ГОДА
@@ -2347,22 +2373,48 @@ function exportCSV(){
     resultBlock.style.display = 'block';
     resultBlock.scrollIntoView({behavior:'smooth', block:'start'});
 
-    // Нативный Android — используем системное «Поделиться»
+    // Нативный Android (WebView + Kotlin bridge)
     if(typeof Android !== 'undefined' && Android.isAvailable()){
         Android.shareText(csv, `Расчётный лист Магнит — ${monthName} ${year}`);
         return;
     }
 
-    // Браузер — копируем в буфер
-    if(navigator.clipboard && navigator.clipboard.writeText){
-        navigator.clipboard.writeText(csv).catch(()=>{
-            textArea.select();
-            document.execCommand('copy');
+    // PWA / браузер — пробуем Web Share API (работает на HTTPS)
+    if(navigator.share){
+        navigator.share({
+            title: `Расчётный лист Магнит — ${monthName} ${year}`,
+            text: csv
+        }).catch(() => {
+            // если отказал — копируем в буфер
+            copyToClipboard(csv, textArea);
         });
-    } else {
-        textArea.select();
+        return;
+    }
+
+    // Запасной — копируем в буфер обмена
+    copyToClipboard(csv, textArea);
+}
+
+function copyToClipboard(text, fallbackEl){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).catch(()=>{
+            if(fallbackEl){ fallbackEl.select(); document.execCommand('copy'); }
+        });
+    } else if(fallbackEl){
+        fallbackEl.select();
         document.execCommand('copy');
     }
+}
+</script>
+
+<script>
+// Регистрация Service Worker для офлайн-работы и установки как приложения
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+            .then(reg => console.log('Service Worker зарегистрирован:', reg.scope))
+            .catch(err => console.log('Ошибка регистрации Service Worker:', err));
+    });
 }
 </script>
 

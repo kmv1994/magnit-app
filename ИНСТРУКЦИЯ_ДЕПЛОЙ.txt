@@ -1,0 +1,121 @@
+═══════════════════════════════════════════════════
+  ИНСТРУКЦИЯ: GitHub Pages + Bubblewrap → APK
+═══════════════════════════════════════════════════
+
+СОСТАВ ПАПКИ (все файлы нужны):
+  index.html            — приложение
+  manifest.json         — описание PWA
+  service-worker.js     — офлайн-кеш
+  icon-192.png          — иконка 192×192
+  icon-512.png          — иконка 512×512
+  icon-maskable-192.png — иконка с отступами 192×192
+  icon-maskable-512.png — иконка с отступами 512×512
+
+
+═══ ШАГ 1: ВЫЛОЖИТЬ НА GITHUB PAGES ═══════════════
+
+1. Зайди на github.com → войди в аккаунт
+
+2. Нажми «New repository» (зелёная кнопка)
+   Название: magnit-salary
+   Visibility: Public (обязательно для бесплатного Pages)
+   ✅ Add a README file → нажми «Create repository»
+
+3. Загрузи файлы:
+   → Нажми «Add file» → «Upload files»
+   → Перетащи ВСЕ 7 файлов из папки
+   → «Commit changes»
+
+4. Включи GitHub Pages:
+   → Settings → Pages (левое меню)
+   → Source: «Deploy from a branch»
+   → Branch: main → /(root) → Save
+
+5. Через 1-2 минуты появится адрес:
+   https://ТВО_ЛОГИН.github.io/magnit-salary/
+
+6. Открой этот адрес в Chrome на телефоне
+   и убедись что приложение работает.
+
+
+═══ ШАГ 2: СГЕНЕРИРОВАТЬ APK через Bubblewrap ═════
+
+(Нужен компьютер с Node.js 14+)
+
+--- Установка ---
+
+npm install -g @bubblewrap/cli
+
+--- Инициализация ---
+
+mkdir magnit-apk
+cd magnit-apk
+bubblewrap init --manifest https://ТВО_ЛОГИН.github.io/magnit-salary/manifest.json
+
+Bubblewrap задаст вопросы — отвечай:
+  Application name:        Магнит Зарплата
+  Short name:              Магнит ЗП
+  Application ID:          com.magnit.salary
+  Display mode:            standalone
+  Orientation:             portrait
+  Theme color:             #e30613
+  Background color:        #f5f5f5
+
+При первом запуске он сам скачает Android SDK и JDK
+(займёт несколько минут).
+
+--- Сборка ---
+
+bubblewrap build
+
+Готовый APK будет здесь:
+  magnit-apk/app-release-unsigned.apk
+
+--- Подписать APK (нужно для установки) ---
+
+Bubblewrap спросит про keystore при сборке.
+Если нет — создай сам:
+
+keytool -genkey -v \
+  -keystore magnit.keystore \
+  -alias magnit \
+  -keyalg RSA \
+  -keysize 2048 \
+  -validity 10000
+
+Затем:
+bubblewrap build --ks magnit.keystore --ks-alias magnit
+
+Готовый подписанный APK: app-release-signed.apk
+
+
+═══ ШАГ 3: УСТАНОВИТЬ НА ТЕЛЕФОН ══════════════════
+
+1. Перенеси APK на телефон (через Telegram / кабель)
+2. Открой файл → разреши установку из неизвестных источников
+3. Установи → приложение появится на рабочем столе
+
+
+═══ ЧТО ПОЛУЧАЕШЬ В ИТОГЕ ══════════════════════════
+
+✅ Настоящая иконка на рабочем столе
+✅ Открывается без браузерной строки
+✅ Работает офлайн (все данные в localStorage)
+✅ Экспорт Excel — скачивается в Downloads
+✅ Поделиться — открывает системное меню Android
+✅ localStorage данные сохраняются между сессиями
+
+
+═══ ВАЖНО ══════════════════════════════════════════
+
+• Приложение будет доступно по URL всем желающим,
+  но данные у каждого свои (хранятся в его браузере)
+
+• При обновлении кода — просто загружай новый
+  index.html в GitHub, APK обновлять не нужно
+
+• Если хочешь приватный репозиторий — нужен
+  GitHub Pro, или используй Netlify (бесплатно
+  поддерживает приватные сайты через drag-and-drop)
+
+═══════════════════════════════════════════════════
