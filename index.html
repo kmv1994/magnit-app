@@ -349,6 +349,14 @@ margin-top:10px;
             📄 Открыть отчёт
         </button>
 
+        <button onclick="exportExcel()" style="background:#2e7d32;">
+            💾 Скачать Excel
+        </button>
+
+        <button onclick="shareExcel()" style="background:#e65100;">
+            📤 Поделиться Excel
+        </button>
+
         <div id="csvResult" style="display:none; margin-top:12px; border-radius:12px; overflow:hidden;">
 
             <div style="background:#2e7d32; color:white; padding:12px 16px; font-weight:bold; font-size:15px;">
@@ -1901,7 +1909,123 @@ function downloadBlob(blob, fileName){
     setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
-    // ГОДА
+// ПОДЕЛИТЬСЯ EXCEL-ФАЙЛОМ
+function shareExcel(){
+    const data     = JSON.parse(localStorage.getItem('days'))     || [];
+    const calendar = JSON.parse(localStorage.getItem('calendar')) || [];
+    const year     = +document.getElementById('yearSelect').value;
+    const month    = +document.getElementById('monthSelect').value;
+    const monthNames = ["Январь","Февраль","Март","Апрель","Май","Июнь",
+                        "Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
+    const monthName = monthNames[month];
+
+    // Фильтруем и сортируем
+    const monthData = data.filter(d=>{
+        const dd = new Date(d.date);
+        return dd.getFullYear()===year && dd.getMonth()===month;
+    }).sort((a,b)=>a.date.localeCompare(b.date));
+
+    if(monthData.length === 0){
+        alert("Нет данных за этот месяц");
+        return;
+    }
+
+    // Считаем итоги
+    let totalBefore=0, totalAfter=0, totalHours=0, totalCarts=0;
+    const pickTotals={};
+    let worked=0, workShifts=0, extraShifts=0, extraIncome=0;
+    monthData.forEach(d=>{
+        totalBefore+=d.total; totalAfter+=d.final;
+        totalHours+=d.hours;  totalCarts+=d.carts;
+        const cal=calendar.find(c=>c.date===d.date);
+        const isExtra=d.isExtra||(cal&&cal.type==='extra')||false;
+        if(cal&&(cal.type==='work'||cal.type==='extra')) worked++;
+        if(isExtra){extraShifts++;extraIncome+=d.final;}else{workShifts++;}
+        d.picks.forEach(p=>{
+            if(!pickTotals[p.type]) pickTotals[p.type]={qty:0,sum:0};
+            pickTotals[p.type].qty+=p.qty;
+            pickTotals[p.type].sum+=p.sum;
+        });
+    });
+    const workDays=calendar.filter(c=>{
+        const d=new Date(c.date);
+        return d.getFullYear()===year&&d.getMonth()===month&&(c.type==='work'||c.type==='extra');
+    }).length;
+    const ndflTotal=totalBefore-totalAfter;
+    const avgDay=worked?(totalAfter/worked):0;
+    const forecast=avgDay*workDays;
+
+    function fmt(d){const p=d.split("-");return p[2]+"."+p[1]+"."+p[0];}
+    function rub(n){return n.toFixed(2)+" ₽";}
+
+    // Строим Excel (тот же формат что exportExcel, но упрощённо)
+    const rows = [];
+    rows.push(["РАСЧЁТНЫЙ ЛИСТ МАГНИТ"]);
+    rows.push([monthName+" "+year]);
+    rows.push([]);
+    rows.push(["ОБЩАЯ ИНФОРМАЦИЯ",""]);
+    rows.push(["Период", monthName+" "+year]);
+    rows.push(["Рабочих дней", workDays]);
+    rows.push(["Отработано смен", worked]);
+    rows.push(["Рабочих смен", workShifts]);
+    rows.push(["Допсмен", extraShifts]);
+    rows.push(["До НДФЛ", rub(totalBefore)]);
+    rows.push(["НДФЛ", rub(ndflTotal)]);
+    rows.push(["После НДФЛ", rub(totalAfter)]);
+    rows.push(["Доход от допсмен", rub(extraIncome)]);
+    rows.push(["Прогноз", rub(forecast)]);
+    rows.push([]);
+    rows.push(["ДЕТАЛИЗАЦИЯ ПО ДНЯМ"]);
+    rows.push(["Дата","Тип","Кол-во","Тариф","Сумма"]);
+
+    monthData.forEach(d=>{
+        const cal=calendar.find(c=>c.date===d.date);
+        const isExtra=d.isExtra||(cal&&cal.type==='extra')||false;
+        const dateLabel=fmt(d.date)+(isExtra?" ⭐":"");
+        d.picks.forEach(p=>{
+            rows.push([dateLabel,p.type,p.qty,settings.rates[p.type]||0,+p.sum.toFixed(2)]);
+        });
+        const hrRate=(d.holiday||isExtra)?settings.hourRate*2:settings.hourRate;
+        rows.push([dateLabel,"Часы"+(isExtra?" ⭐×2":d.holiday?" ×2":""),d.hours,hrRate,+(d.hours*hrRate).toFixed(2)]);
+        rows.push([dateLabel,"Телеги",d.carts,settings.cartRate,+(d.carts*settings.cartRate).toFixed(2)]);
+        rows.push([dateLabel,"ИТОГО","","",+d.final.toFixed(2)]);
+        rows.push([]);
+    });
+    rows.push(["ИТОГО ЗА МЕСЯЦ","","","",+totalAfter.toFixed(2)]);
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws["!cols"] = [{wch:26},{wch:22},{wch:10},{wch:10},{wch:14}];
+    XLSX.utils.book_append_sheet(wb, ws, "Расчётный лист");
+
+    const fileName = `Магнит_${monthName}_${year}.xlsx`;
+    const wbArray = XLSX.write(wb, {bookType:"xlsx", type:"array"});
+    const blob = new Blob([wbArray], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    });
+    const file = new File([blob], fileName, {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    });
+
+    // Поделиться файлом через Web Share API
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+        navigator.share({
+            files: [file],
+            title: `Расчётный лист Магнит — ${monthName} ${year}`
+        }).catch(err=>{
+            if(err.name !== 'AbortError'){
+                // Если шаринг файлов не работает — скачиваем
+                downloadBlob(blob, fileName);
+            }
+        });
+    } else {
+        // Запасной — скачиваем
+        downloadBlob(blob, fileName);
+        alert("Поделиться файлом не поддерживается — файл скачан в Downloads");
+    }
+}
+
+
     let ySel=document.getElementById('yearSelect');
 
     for(let y=2025;y<=2035;y++){
