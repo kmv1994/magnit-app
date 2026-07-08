@@ -1950,7 +1950,7 @@ function downloadBlob(blob, fileName){
 }
 
 // ПОДЕЛИТЬСЯ EXCEL-ФАЙЛОМ
-function shareExcel(){
+async function shareExcel(){
     const settings = JSON.parse(localStorage.getItem('settings')) || {
         hourRate: 139, cartRate: 8, ndfl: 0.13, rates: {}
     };
@@ -2051,20 +2051,31 @@ function shareExcel(){
     });
 
     // Поделиться файлом через Web Share API
-    if(navigator.canShare && navigator.canShare({files:[file]})){
-        navigator.share({
-            files: [file],
-            title: `Расчётный лист Магнит — ${monthName} ${year}`
-        }).catch(err=>{
-            if(err.name !== 'AbortError'){
-                // Если шаринг файлов не работает — скачиваем
-                downloadBlob(blob, fileName);
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                files: [file],
+                title: `Расчётный лист Магнит — ${monthName} ${year}`
+            });
+        } catch(err) {
+            // Пользователь отменил или файлы не поддерживаются
+            if (err.name !== 'AbortError') {
+                // Попробуем поделиться без файла (только текст)
+                try {
+                    await navigator.share({
+                        title: `Расчётный лист Магнит — ${monthName} ${year}`,
+                        text: `Зарплата за ${monthName} ${year}: ${rub(totalAfter)}`
+                    });
+                } catch(e2) {
+                    // Совсем не работает — скачиваем
+                    downloadBlob(blob, fileName);
+                }
             }
-        });
+        }
     } else {
-        // Запасной — скачиваем
+        // Share API недоступен — скачиваем
         downloadBlob(blob, fileName);
-        alert("Поделиться файлом не поддерживается — файл скачан в Downloads");
+        alert("«Поделиться» недоступно в этом браузере — файл скачан в Downloads");
     }
 }
 
