@@ -1385,9 +1385,8 @@ function renderCalendar(){
     let month = +document.getElementById('calendarMonth').value;
 
     let monthDays = data.filter(d=>{
-        let current = new Date(d.date);
-        return current.getFullYear()===year &&
-               current.getMonth()===month;
+        let parts = d.date.split('-');
+        return +parts[0]===year && +parts[1]-1===month;
     });
 
     let html = `
@@ -1409,7 +1408,8 @@ function renderCalendar(){
     }
 
     monthDays.forEach(d=>{
-        let current = new Date(d.date);
+        let parts = d.date.split('-');
+        let day = +parts[2];
         let index = data.findIndex(x => x.date === d.date);
 
         let cls = d.type==='work' ? 'calendar-work'
@@ -1421,7 +1421,7 @@ function renderCalendar(){
         html += `
         <div class="calendar-cell ${cls}"
              onclick="toggleDay(${index})">
-            ${current.getDate()}${mark}
+            ${day}${mark}
         </div>`;
     });
 
@@ -1511,6 +1511,10 @@ function renderCalendar(){
 
     // ЭКСПОРТ В EXCEL — стилизованный отчёт
     function exportExcel(){
+
+    const settings = JSON.parse(localStorage.getItem('settings')) || {
+        hourRate: 139, cartRate: 8, ndfl: 0.13, rates: {}
+    };
 
     const data = JSON.parse(localStorage.getItem('days')) || [];
     const calendar = JSON.parse(localStorage.getItem('calendar')) || [];
@@ -1947,6 +1951,9 @@ function downloadBlob(blob, fileName){
 
 // ПОДЕЛИТЬСЯ EXCEL-ФАЙЛОМ
 function shareExcel(){
+    const settings = JSON.parse(localStorage.getItem('settings')) || {
+        hourRate: 139, cartRate: 8, ndfl: 0.13, rates: {}
+    };
     const data     = JSON.parse(localStorage.getItem('days'))     || [];
     const calendar = JSON.parse(localStorage.getItem('calendar')) || [];
     const year     = +document.getElementById('yearSelect').value;
