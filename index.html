@@ -445,9 +445,13 @@ margin-top:10px;
 
     <div id="reportList"></div>
 
+    <div class="block" style="background:#fff8e1; border:2px solid #ffb300;">
+        <h3>💳 АВАНС (часы 1–15 число)</h3>
+        <div id="advanceSummary" style="color:#e65100; font-size:15px;"></div>
+    </div>
+
     <div class="block">
         <h3>📊 МЕСЯЧНЫЙ ИТОГ</h3>
-
         <div id="summary"></div>
     </div>
 
@@ -868,6 +872,10 @@ function saveDay(){
     // ОТЧЕТЫ
     function loadReports(){
 
+    let settings = JSON.parse(localStorage.getItem('settings')) || {
+        hourRate: 139, cartRate: 8, ndfl: 0.13, rates: {}
+    };
+
     let data = JSON.parse(
         localStorage.getItem('days')
     ) || [];
@@ -1176,6 +1184,39 @@ data.forEach((d)=>{
 
 renderCharts(monthData);
 
+// ── АВАНС: только часы с 1 по 15 число ──────────────
+const advanceDays = monthData.filter(d => {
+    const day = +d.date.split('-')[2];
+    return day >= 1 && day <= 15;
+});
+
+let advanceHours = 0;
+let advanceMoney = 0;
+let advanceMoneyAfter = 0;
+
+advanceDays.forEach(d => {
+    const cal = calendar.find(c => c.date === d.date);
+    const isExtra = d.isExtra || (cal && cal.type === 'extra') || false;
+    const hourRate = (d.holiday || isExtra) ? settings.hourRate * 2 : settings.hourRate;
+    const hourSum = d.hours * hourRate;
+    advanceHours += d.hours;
+    advanceMoney += hourSum;
+    advanceMoneyAfter += hourSum * (1 - settings.ndfl);
+});
+
+const advanceEl = document.getElementById('advanceSummary');
+if(advanceEl){
+    if(advanceDays.length === 0){
+        advanceEl.innerHTML = '<span style="color:#999">Нет данных за 1–15 число</span>';
+    } else {
+        advanceEl.innerHTML = `
+        ⏱ Отработано часов (1–15): <b>${advanceHours} ч</b><br>
+        💰 До НДФЛ: <b>${advanceMoney.toFixed(2)} руб</b><br>
+        ✅ После НДФЛ: <b>${advanceMoneyAfter.toFixed(2)} руб</b>
+        `;
+    }
+}
+
 }
 
 // ── ГРАФИКИ ──────────────────────────────────────
@@ -1396,6 +1437,10 @@ function renderCalendar(){
         return +parts[0]===year && +parts[1]-1===month;
     });
 
+    // Индексируем по дате для быстрого поиска
+    let dayMap = {};
+    monthDays.forEach(d => { dayMap[d.date] = d; });
+
     let html = `
     <div class="calendar-grid">
         <div class="calendar-head">Пн</div>
@@ -1407,30 +1452,43 @@ function renderCalendar(){
         <div class="calendar-head">Вс</div>
     `;
 
+    // Первый день месяца — без UTC, используем локальную дату
     let firstDate = new Date(year, month, 1);
-    let firstDay = (firstDate.getDay() + 6) % 7;
+    let firstDay = (firstDate.getDay() + 6) % 7; // 0=Пн, 6=Вс
 
-    for(let i=0;i<firstDay;i++){
+    // Количество дней в месяце
+    let daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    // Пустые ячейки до первого числа
+    for(let i = 0; i < firstDay; i++){
         html += `<div class="calendar-empty"></div>`;
     }
 
-    monthDays.forEach(d=>{
-        let parts = d.date.split('-');
-        let day = +parts[2];
-        let index = data.findIndex(x => x.date === d.date);
+    // Все дни месяца
+    for(let day = 1; day <= daysInMonth; day++){
+        let mm = String(month + 1).padStart(2, '0');
+        let dd = String(day).padStart(2, '0');
+        let dateStr = `${year}-${mm}-${dd}`;
+        let d = dayMap[dateStr];
+        let index = data.findIndex(x => x.date === dateStr);
 
-        let cls = d.type==='work' ? 'calendar-work'
-                : d.type==='extra' ? 'calendar-extra'
-                : 'calendar-off';
-
-        let mark = d.type==='extra' ? '⭐' : '';
+        let cls, mark;
+        if(d){
+            cls  = d.type==='work'  ? 'calendar-work'
+                 : d.type==='extra' ? 'calendar-extra'
+                 : 'calendar-off';
+            mark = d.type==='extra' ? '⭐' : '';
+        } else {
+            cls  = 'calendar-off';
+            mark = '';
+        }
 
         html += `
         <div class="calendar-cell ${cls}"
-             onclick="toggleDay(${index})">
+             onclick="${index >= 0 ? 'toggleDay('+index+')' : 'addCalendarDay(\''+dateStr+'\')'}">
             ${day}${mark}
         </div>`;
-    });
+    }
 
     html += `</div>`;
 
@@ -1464,6 +1522,18 @@ function renderCalendar(){
 
         renderCalendar();
     }
+
+    // Добавить день которого нет в массиве (тап по дню вне графика)
+    function addCalendarDay(dateStr){
+        let data = JSON.parse(localStorage.getItem('calendar')) || [];
+        // Добавляем как выходной, следующий тап переключит на рабочий
+        data.push({ date: dateStr, type: 'work' });
+        // Сортируем по дате
+        data.sort((a,b) => a.date.localeCompare(b.date));
+        localStorage.setItem('calendar', JSON.stringify(data));
+        renderCalendar();
+    }
+
     // НАСТРОЙКИ
     function openSettings(){
 
