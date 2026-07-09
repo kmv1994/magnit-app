@@ -1,7 +1,7 @@
 // service-worker.js
 // Версия кеша — меняется при каждом обновлении файлов
 // ВАЖНО: при обновлении index.html нужно изменить эту строку
-const CACHE_VERSION = 'magnit-salary-3a7b0546';
+const CACHE_VERSION = 'magnit-salary-40a2e753';
 const CACHE_NAME = CACHE_VERSION;
 
 const ASSETS = [
