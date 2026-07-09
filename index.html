@@ -891,6 +891,7 @@ function saveDay(){
     let html = '';
 
     let totalAfter = 0;
+    let totalBefore = 0;
 
     let worked = 0;
     let workShifts = 0;
@@ -947,6 +948,7 @@ let extraIncome = 0;
         }
 
         totalAfter += d.final;
+        totalBefore += d.total;
 
 totalHours += d.hours;
 
@@ -2536,30 +2538,15 @@ function copyToClipboard(text, fallbackEl){
 </script>
 
 <script>
-// Регистрация Service Worker с принудительным обновлением
+// Регистрация Service Worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./service-worker.js')
             .then(reg => {
-                console.log('SW зарегистрирован:', reg.scope);
-                // Проверяем обновление каждый раз при открытии
+                // Проверяем обновление при каждом открытии
                 reg.update();
-                // Если найдено обновление — перезагружаем страницу автоматически
-                reg.addEventListener('updatefound', () => {
-                    const newWorker = reg.installing;
-                    newWorker.addEventListener('statechange', () => {
-                        if (newWorker.state === 'activated') {
-                            window.location.reload();
-                        }
-                    });
-                });
             })
-            .catch(err => console.log('Ошибка SW:', err));
-
-        // Если контроллер SW сменился (новая версия) — перезагружаем
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-            window.location.reload();
-        });
+            .catch(err => console.log('SW error:', err));
     });
 }
 </script>
