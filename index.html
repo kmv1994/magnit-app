@@ -527,7 +527,29 @@ margin-top:10px;
 
     </div>
 
-    <button onclick="saveSettings()">
+    <div class="block">
+        <h3>🏆 Премия за стаж</h3>
+
+        <h3 style="font-size:14px; color:#555; font-weight:normal;">📅 Дата трудоустройства</h3>
+        <input type="date" id="set_hireDate" style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd; font-size:15px; margin-bottom:8px;">
+
+        <h3 style="font-size:14px; color:#555; font-weight:normal;">💰 ЦУ (целевой уровень, руб до НДФЛ)</h3>
+        <input type="number" id="set_targetSalary" placeholder="например 50000">
+
+        <h3 style="font-size:14px; color:#555; font-weight:normal; margin-top:12px;">📊 Шкала стажа (лет → %)</h3>
+        <div id="tenureList" style="margin-bottom:8px;"></div>
+        <button onclick="addTenureRow()" style="background:#1565c0; margin-top:4px; padding:8px 16px; font-size:13px;">
+            ➕ Добавить ступень стажа
+        </button>
+    </div>
+
+    <div class="block">
+        <h3>💸 Премия за потери</h3>
+        <h3 style="font-size:14px; color:#555; font-weight:normal;">Фикс сумма до НДФЛ (руб)</h3>
+        <input type="number" id="set_lossesPremium" placeholder="например 3800">
+    </div>
+
+        <button onclick="saveSettings()">
         Сохранить настройки
     </button>
 
@@ -598,7 +620,14 @@ margin-top:10px;
             "Мультиотборка овощи/фрукты":1.52,
             "Алкоголь":2.38,
             "Мультиотборка алкоголь":2.06
-        }
+        },
+        hireDate: '',
+        targetSalary: 0,
+        tenureSteps: [
+            {years: 1, percent: 3},
+            {years: 2, percent: 5}
+        ],
+        lossesPremium: 3800
     };
 
     // НАВИГАЦИЯ
@@ -760,6 +789,7 @@ document.querySelectorAll('.pick-item').forEach(div=>{
     picks.push({
         type:type,
         qty:qty,
+        rate:rate,
         sum:sum
     });
 
@@ -1155,6 +1185,52 @@ ${forecastNdfl.toFixed(2)} руб
 ${forecastAfter.toFixed(2)} руб
 `;
 
+// ── ПРЕМИИ ─────────────────────────────────────────
+let tenureBonus = 0, tenureYears = 0, tenurePercent = 0;
+if(settings.hireDate && settings.targetSalary > 0){
+    const hire = new Date(settings.hireDate);
+    const now  = new Date();
+    tenureYears = (now - hire) / (1000*60*60*24*365.25);
+    const steps = (settings.tenureSteps||[]).slice().sort((a,b)=>b.years-a.years);
+    for(const step of steps){
+        if(tenureYears >= step.years){ tenurePercent = step.percent; break; }
+    }
+    tenureBonus = settings.targetSalary * tenurePercent / 100 * (1 - settings.ndfl);
+}
+
+const lossesBefore = settings.lossesPremium || 0;
+const lossesAfter  = lossesBefore * (1 - settings.ndfl);
+
+const advDays2 = monthData.filter(d => +d.date.split('-')[2] <= 15);
+let advMoneyAfter2 = 0;
+advDays2.forEach(d=>{
+    const cal2 = calendar.find(c=>c.date===d.date);
+    const isExt = d.isExtra||(cal2&&cal2.type==='extra')||false;
+    const hr2 = (d.holiday||isExt)?settings.hourRate*2:settings.hourRate;
+    advMoneyAfter2 += d.hours * hr2 * (1 - settings.ndfl);
+});
+
+const totalWithBonusBefore = totalBefore + (settings.targetSalary*tenurePercent/100) + lossesBefore;
+const totalWithBonusAfter  = totalAfter  + tenureBonus + lossesAfter;
+const remainderAfter = totalWithBonusAfter - advMoneyAfter2;
+
+summaryHtml += `
+<hr>
+🏆 Стаж: ${Math.floor(tenureYears)} лет ${Math.floor((tenureYears%1)*12)} мес<br>
+📊 Процент за стаж: ${tenurePercent}%<br>
+💰 Премия за стаж до НДФЛ: ${(settings.targetSalary*tenurePercent/100).toFixed(2)} руб<br>
+✅ Премия за стаж после НДФЛ: ${tenureBonus.toFixed(2)} руб<br>
+<hr>
+💸 Премия за потери до НДФЛ: ${lossesBefore.toFixed(2)} руб<br>
+✅ Премия за потери после НДФЛ: ${lossesAfter.toFixed(2)} руб<br>
+<hr>
+💳 Аванс (часы 1–15) после НДФЛ: ${advMoneyAfter2.toFixed(2)} руб<br>
+<hr>
+💼 ИТОГО с премиями до НДФЛ: ${totalWithBonusBefore.toFixed(2)} руб<br>
+💼 ИТОГО с премиями после НДФЛ: ${totalWithBonusAfter.toFixed(2)} руб<br>
+<b style="color:#e30613;font-size:16px;">💳 Остаток к выплате (после аванса): ${remainderAfter.toFixed(2)} руб</b>
+`;
+
 document.getElementById(
     'summary'
 ).innerHTML = summaryHtml;
@@ -1540,15 +1616,14 @@ function renderCalendar(){
     function openSettings(){
 
         document.getElementById('set_hourRate').value=settings.hourRate;
-
         document.getElementById('set_cartRate').value=settings.cartRate;
-
         document.getElementById('set_ndfl').value=settings.ndfl;
+        document.getElementById('set_hireDate').value=settings.hireDate||'';
+        document.getElementById('set_targetSalary').value=settings.targetSalary||0;
+        document.getElementById('set_lossesPremium').value=settings.lossesPremium||3800;
 
         let html='';
-
         for(let k in settings.rates){
-
             html += `
             ${k}
             <input
@@ -1556,33 +1631,66 @@ function renderCalendar(){
             value="${settings.rates[k]}">
             `;
         }
-
         document.getElementById('ratesList').innerHTML=html;
+        renderTenureList();
+    }
+
+    function renderTenureList(){
+        const steps = settings.tenureSteps || [];
+        let html = '';
+        steps.forEach((s,i)=>{
+            html += `<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+                <span style="font-size:13px;color:#555;min-width:50px;">Лет:</span>
+                <input type="number" data-tenure-idx="${i}" data-tenure-field="years"
+                    value="${s.years}" min="0" step="1"
+                    style="width:70px;padding:6px;border-radius:8px;border:1px solid #ddd;">
+                <span style="font-size:13px;color:#555;">→</span>
+                <input type="number" data-tenure-idx="${i}" data-tenure-field="percent"
+                    value="${s.percent}" min="0" step="0.1"
+                    style="width:70px;padding:6px;border-radius:8px;border:1px solid #ddd;">
+                <span style="font-size:13px;color:#555;">%</span>
+                <button onclick="removeTenureRow(${i})"
+                    style="background:#ffebee;color:#c62828;border:none;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:13px;">✕</button>
+            </div>`;
+        });
+        document.getElementById('tenureList').innerHTML = html;
+    }
+
+    function addTenureRow(){
+        if(!settings.tenureSteps) settings.tenureSteps = [];
+        settings.tenureSteps.push({years:0, percent:0});
+        renderTenureList();
+    }
+
+    function removeTenureRow(i){
+        settings.tenureSteps.splice(i,1);
+        renderTenureList();
     }
 
     // СОХРАНИТЬ НАСТРОЙКИ
     function saveSettings(){
 
-        settings.hourRate=
-            +document.getElementById('set_hourRate').value;
+        settings.hourRate      = +document.getElementById('set_hourRate').value;
+        settings.cartRate      = +document.getElementById('set_cartRate').value;
+        settings.ndfl          = +document.getElementById('set_ndfl').value;
+        settings.hireDate      = document.getElementById('set_hireDate').value;
+        settings.targetSalary  = +document.getElementById('set_targetSalary').value;
+        settings.lossesPremium = +document.getElementById('set_lossesPremium').value;
 
-        settings.cartRate=
-            +document.getElementById('set_cartRate').value;
-
-        settings.ndfl=
-            +document.getElementById('set_ndfl').value;
-
-        document.querySelectorAll('#ratesList input')
-        .forEach(i=>{
-
+        document.querySelectorAll('#ratesList input').forEach(i=>{
             settings.rates[i.dataset.type]=+i.value;
         });
 
-        localStorage.setItem(
-            'settings',
-            JSON.stringify(settings)
-        );
+        const tenureInputs = document.querySelectorAll('[data-tenure-idx]');
+        tenureInputs.forEach(inp=>{
+            const idx   = +inp.dataset.tenureIdx;
+            const field = inp.dataset.tenureField;
+            if(!settings.tenureSteps[idx]) settings.tenureSteps[idx]={};
+            settings.tenureSteps[idx][field] = +inp.value;
+        });
+        settings.tenureSteps.sort((a,b)=>a.years-b.years);
 
+        localStorage.setItem('settings', JSON.stringify(settings));
         alert("Настройки сохранены");
     }
 
@@ -1770,6 +1878,29 @@ function renderCalendar(){
     cell(0,R,"💰  ФИНАНСОВЫЕ ИТОГИ",s({bold:true, sz:12, color:WHITE, bg:GREEN_D, align:"center"}));
     R++;
 
+    // Расчёт премий для Excel
+    let xlsTenureBonus=0, xlsTenureYears=0, xlsTenurePercent=0;
+    if(settings.hireDate && settings.targetSalary>0){
+        const hire=new Date(settings.hireDate);
+        xlsTenureYears=(new Date()-hire)/(1000*60*60*24*365.25);
+        const steps=(settings.tenureSteps||[]).slice().sort((a,b)=>b.years-a.years);
+        for(const step of steps){if(xlsTenureYears>=step.years){xlsTenurePercent=step.percent;break;}}
+        xlsTenureBonus=settings.targetSalary*xlsTenurePercent/100*(1-settings.ndfl);
+    }
+    const xlsLossesBefore=settings.lossesPremium||0;
+    const xlsLossesAfter=xlsLossesBefore*(1-settings.ndfl);
+    const xlsTenurebefore=settings.targetSalary*xlsTenurePercent/100;
+    const xlsAdvDays=monthData.filter(d=>+d.date.split('-')[2]<=15);
+    let xlsAdvAfter=0;
+    xlsAdvDays.forEach(d=>{
+        const cal=calendar.find(c=>c.date===d.date);
+        const isExt=d.isExtra||(cal&&cal.type==='extra')||false;
+        const hr=(d.holiday||isExt)?settings.hourRate*2:settings.hourRate;
+        xlsAdvAfter+=d.hours*hr*(1-settings.ndfl);
+    });
+    const xlsTotalWithBonus=totalAfter+xlsTenureBonus+xlsLossesAfter;
+    const xlsRemainder=xlsTotalWithBonus-xlsAdvAfter;
+
     const finRows = [
         ["📊 Средний заработок/день", rub(avgDay),        YELLOW_L],
         ["⏱ Среднее часов/день",      avgHours.toFixed(1)+" ч", WHITE],
@@ -1777,6 +1908,15 @@ function renderCalendar(){
         ["🏆 Лучший день",             bestDay ? fmt(bestDay)+" — "+rub(bestVal) : "—", YELLOW_L],
         ["🔮 Прогноз до НДФЛ",        rub(forecastBefore), GREEN_L],
         ["✅ Прогноз после НДФЛ",      rub(forecast),       GREEN_L],
+        ["🏆 Стаж",                    Math.floor(xlsTenureYears)+" лет "+Math.floor((xlsTenureYears%1)*12)+" мес", WHITE],
+        ["📊 % за стаж",               xlsTenurePercent+"%", WHITE],
+        ["💰 Премия за стаж до НДФЛ",  rub(xlsTenurebefore), BLUE_L],
+        ["✅ Премия за стаж после НДФЛ",rub(xlsTenureBonus), GREEN_L],
+        ["💸 Премия за потери до НДФЛ", rub(xlsLossesBefore), RED_LIGHT],
+        ["✅ Премия за потери после НДФЛ",rub(xlsLossesAfter), GREEN_L],
+        ["💳 Аванс (часы 1–15) после НДФЛ", rub(xlsAdvAfter), YELLOW_L],
+        ["💼 ИТОГО с премиями после НДФЛ",   rub(xlsTotalWithBonus), GREEN_L],
+        ["💳 Остаток к выплате",              rub(xlsRemainder), RED_LIGHT],
     ];
 
     finRows.forEach(([label, val, bg])=>{
@@ -2198,7 +2338,7 @@ function openReportPage(){
                 <td style="${tdStyle}">${dateLabel}</td>
                 <td style="${tdStyle}">${p.type}</td>
                 <td style="${tdNum}">${p.qty}</td>
-                <td style="${tdNum}">${settings.rates[p.type]||0}</td>
+                <td style="${tdNum}">${p.rate||settings.rates[p.type]||0}</td>
                 <td style="${tdNum}">${p.sum.toFixed(2)}</td></tr>`;
         });
         dayRows+=`<tr style="background:${highlightBg}">
