@@ -648,6 +648,9 @@ margin-top:10px;
         if(id==='settings'){
             openSettings();
         }
+        if(id==='reports'){
+            renderFines();
+        }
     }
 
     // ДОБАВИТЬ СКЛАД
@@ -900,7 +903,91 @@ function saveDay(){
 }
 
     // ОТЧЕТЫ
+    // ШТРАФЫ ──────────────────────────────────────────
+
+    function getFinesKey(){
+        const year  = +document.getElementById('yearSelect').value;
+        const month = +document.getElementById('monthSelect').value;
+        return `fines_${year}_${month}`;
+    }
+
+    function getFines(){
+        return JSON.parse(localStorage.getItem(getFinesKey())) || [];
+    }
+
+    function saveFines(fines){
+        localStorage.setItem(getFinesKey(), JSON.stringify(fines));
+    }
+
+    function addFine(){
+        const amountEl  = document.getElementById('fineAmount');
+        const commentEl = document.getElementById('fineComment');
+        const amount    = parseFloat(amountEl.value);
+        if(!amount || amount <= 0){ alert('Введите сумму штрафа'); return; }
+
+        const fines = getFines();
+        fines.push({
+            id:      Date.now(),
+            amount:  amount,
+            comment: commentEl.value.trim() || '',
+            date:    new Date().toLocaleDateString('ru-RU')
+        });
+        saveFines(fines);
+        amountEl.value = '';
+        commentEl.value = '';
+        renderFines();
+        if(document.getElementById('summary').innerHTML){
+            loadReports();
+        }
+    }
+
+    function removeFine(id){
+        saveFines(getFines().filter(f => f.id !== id));
+        renderFines();
+        if(document.getElementById('summary').innerHTML){
+            loadReports();
+        }
+    }
+
+    function renderFines(){
+        const fines    = getFines();
+        const listEl   = document.getElementById('finesList');
+        const totalEl  = document.getElementById('finesTotalBlock');
+        const amountEl = document.getElementById('finesTotalAmount');
+        if(!listEl) return;
+
+        if(fines.length === 0){
+            listEl.innerHTML = '<div style="color:#999; font-size:14px; padding:4px 0;">Штрафов нет</div>';
+            if(totalEl) totalEl.style.display = 'none';
+            return;
+        }
+
+        let html = '', total = 0;
+        fines.forEach(f => {
+            total += f.amount;
+            html += `<div style="display:flex; align-items:center; justify-content:space-between;
+                        padding:10px 0; border-bottom:1px solid #f0f0f0; gap:8px;">
+                <div style="flex:1;">
+                    <span style="font-weight:bold; color:#c62828;">−${f.amount.toFixed(2)} ₽</span>
+                    ${f.comment ? `<span style="color:#555; font-size:13px; margin-left:8px;">${f.comment}</span>` : ''}
+                    <div style="font-size:12px; color:#999; margin-top:2px;">${f.date}</div>
+                </div>
+                <button onclick="removeFine(${f.id})"
+                    style="background:#ffebee; color:#c62828; border:none; border-radius:8px;
+                           padding:6px 12px; font-size:13px; cursor:pointer; min-height:auto; width:auto; margin:0;">
+                    🗑 Удалить
+                </button>
+            </div>`;
+        });
+
+        listEl.innerHTML = html;
+        if(totalEl){ totalEl.style.display = 'block'; amountEl.textContent = total.toFixed(2); }
+    }
+
+    // ОТЧЕТЫ
     function loadReports(){
+
+    renderFines();
 
     let settings = JSON.parse(localStorage.getItem('settings')) || {
         hourRate: 139, cartRate: 8, ndfl: 0.13, rates: {}
@@ -1212,7 +1299,8 @@ advDays2.forEach(d=>{
 
 const totalWithBonusBefore = totalBefore + (settings.targetSalary*tenurePercent/100) + lossesBefore;
 const totalWithBonusAfter  = totalAfter  + tenureBonus + lossesAfter;
-const remainderAfter = totalWithBonusAfter - advMoneyAfter2;
+const finesTotal2 = (JSON.parse(localStorage.getItem(`fines_${year}_${month}`))||[]).reduce((s,f)=>s+f.amount,0);
+const remainderAfter = totalWithBonusAfter - advMoneyAfter2 - finesTotal2;
 
 summaryHtml += `
 <hr>
@@ -1228,7 +1316,8 @@ summaryHtml += `
 <hr>
 💼 ИТОГО с премиями до НДФЛ: ${totalWithBonusBefore.toFixed(2)} руб<br>
 💼 ИТОГО с премиями после НДФЛ: ${totalWithBonusAfter.toFixed(2)} руб<br>
-<b style="color:#e30613;font-size:16px;">💳 Остаток к выплате (после аванса): ${remainderAfter.toFixed(2)} руб</b>
+<b style="color:#e30613;font-size:16px;">💳 Остаток к выплате (после аванса${finesTotal2>0?' и штрафов':''}): ${remainderAfter.toFixed(2)} руб</b>
+${finesTotal2>0 ? `<br><span style="color:#c62828;">⚠️ Штрафы: −${finesTotal2.toFixed(2)} руб</span>` : ''}
 `;
 
 document.getElementById(
@@ -1899,7 +1988,8 @@ function renderCalendar(){
         xlsAdvAfter+=d.hours*hr*(1-settings.ndfl);
     });
     const xlsTotalWithBonus=totalAfter+xlsTenureBonus+xlsLossesAfter;
-    const xlsRemainder=xlsTotalWithBonus-xlsAdvAfter;
+    const xlsFinesTotal=(JSON.parse(localStorage.getItem(`fines_${year}_${month}`))||[]).reduce((s,f)=>s+f.amount,0);
+    const xlsRemainder=xlsTotalWithBonus-xlsAdvAfter-xlsFinesTotal;
 
     const finRows = [
         ["📊 Средний заработок/день", rub(avgDay),        YELLOW_L],
@@ -1916,6 +2006,7 @@ function renderCalendar(){
         ["✅ Премия за потери после НДФЛ",rub(xlsLossesAfter), GREEN_L],
         ["💳 Аванс (часы 1–15) после НДФЛ", rub(xlsAdvAfter), YELLOW_L],
         ["💼 ИТОГО с премиями после НДФЛ",   rub(xlsTotalWithBonus), GREEN_L],
+        ["⚠️ Штрафы за месяц",               xlsFinesTotal>0 ? "−"+rub(xlsFinesTotal) : "Нет", xlsFinesTotal>0 ? RED_LIGHT : WHITE],
         ["💳 Остаток к выплате",              rub(xlsRemainder), RED_LIGHT],
     ];
 
