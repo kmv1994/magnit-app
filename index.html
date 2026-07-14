@@ -906,13 +906,25 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         </div>
     </div>
 
-    <!-- Выбор месяца для главной -->
+    <!-- Выбор периода — только месяцы с данными -->
     <div class="card" style="margin-bottom:12px;">
-        <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:13px;color:var(--text2);font-weight:600;">Период:</span>
-            <select id="homeYear" onchange="refreshHome()" style="flex:1;min-height:36px;font-size:13px;margin:0;padding:6px 10px;"></select>
-            <select id="homeMonth" onchange="refreshHome()" style="flex:1.5;min-height:36px;font-size:13px;margin:0;padding:6px 10px;"></select>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <button onclick="homePrevPeriod()"
+                style="width:40px;min-height:40px;background:var(--bg);color:var(--text1);
+                       border:1px solid var(--border);border-radius:10px;font-size:18px;
+                       padding:0;margin:0;flex-shrink:0;">‹</button>
+            <div id="homePeriodLabel"
+                style="flex:1;text-align:center;font-size:15px;font-weight:700;color:var(--text1);">
+                —
+            </div>
+            <button onclick="homeNextPeriod()"
+                style="width:40px;min-height:40px;background:var(--bg);color:var(--text1);
+                       border:1px solid var(--border);border-radius:10px;font-size:18px;
+                       padding:0;margin:0;flex-shrink:0;">›</button>
         </div>
+        <!-- Скрытые селекторы для совместимости -->
+        <select id="homeYear" style="display:none;" onchange="refreshHome()"></select>
+        <select id="homeMonth" style="display:none;" onchange="refreshHome()"></select>
     </div>
 
     <!-- Быстрые действия -->
@@ -1193,6 +1205,26 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         💾 Сохранить настройки
     </button>
 
+    <!-- Резервная копия -->
+    <div class="card" style="border:1.5px solid var(--blue-bg);">
+        <div class="section-title" style="margin-bottom:14px;">🗄 Резервная копия данных</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.5;">
+            Сохраните все данные в файл перед переустановкой приложения или сменой телефона.
+        </p>
+        <button onclick="exportBackup()" style="background:var(--blue);margin-bottom:8px;">
+            📤 Сохранить резервную копию
+        </button>
+        <label style="display:block;width:100%;cursor:pointer;margin:0;">
+            <div style="display:flex;align-items:center;justify-content:center;gap:8px;
+                        background:var(--bg);color:var(--text1);border:1.5px solid var(--border);
+                        border-radius:var(--radius-sm);min-height:50px;font-size:15px;font-weight:600;">
+                📥 Восстановить из копии
+            </div>
+            <input type="file" accept=".json" onchange="importBackup(event)"
+                style="display:none;">
+        </label>
+    </div>
+
 </div>
 
 <!-- СТРАНИЦА ОТЧЁТА -->
@@ -1347,98 +1379,91 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     }
 
     // ОБНОВИТЬ ГЛАВНУЮ ─────────────────────────────────
+    // УМНЫЙ ВЫБОР ПЕРИОДА ─────────────────────────────
+    const _monthNames = ["Январь","Февраль","Март","Апрель","Май","Июнь",
+                         "Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
+
+    function getAvailablePeriods(){
+        const data = JSON.parse(localStorage.getItem('days')) || [];
+        const seen = new Set();
+        data.forEach(d=>{ const p=d.date.split('-'); seen.add(p[0]+'-'+p[1]); });
+        const now = new Date();
+        seen.add(now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0'));
+        return Array.from(seen).sort();
+    }
+
+    let _homePeriods = [];
+    let _homePeriodIdx = 0;
+
+    function initHomePeriods(){
+        _homePeriods = getAvailablePeriods();
+        const now = new Date();
+        const cur = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+        _homePeriodIdx = _homePeriods.indexOf(cur);
+        if(_homePeriodIdx < 0) _homePeriodIdx = _homePeriods.length - 1;
+    }
+
+    function homePrevPeriod(){
+        if(_homePeriodIdx > 0){ _homePeriodIdx--; refreshHome(); }
+    }
+
+    function homeNextPeriod(){
+        if(_homePeriodIdx < _homePeriods.length - 1){ _homePeriodIdx++; refreshHome(); }
+    }
+
     function refreshHome(){
-        const monthNames = ["Январь","Февраль","Март","Апрель","Май","Июнь",
-                            "Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
+        _homePeriods = getAvailablePeriods();
+        if(_homePeriods.length === 0) return;
+        if(_homePeriodIdx >= _homePeriods.length) _homePeriodIdx = _homePeriods.length - 1;
 
-        const yearEl  = document.getElementById('homeYear');
-        const monthEl = document.getElementById('homeMonth');
+        const periodStr = _homePeriods[_homePeriodIdx];
+        const parts = periodStr.split('-');
+        const year  = +parts[0];
+        const month = +parts[1] - 1;
 
-        // Инициализируем селекторы если нужно
-        if(!yearEl.options.length){
-            const now = new Date();
-            for(let y = now.getFullYear()-1; y <= now.getFullYear()+1; y++){
-                const opt = document.createElement('option');
-                opt.value = y; opt.textContent = y;
-                if(y === now.getFullYear()) opt.selected = true;
-                yearEl.appendChild(opt);
-            }
-            monthNames.forEach((m,i)=>{
-                const opt = document.createElement('option');
-                opt.value = i; opt.textContent = m;
-                if(i === now.getMonth()) opt.selected = true;
-                monthEl.appendChild(opt);
-            });
+        // Обновляем метку
+        const label = document.getElementById('homePeriodLabel');
+        if(label){
+            label.textContent = _monthNames[month] + ' ' + year;
+            const prevBtn = label.previousElementSibling;
+            const nextBtn = label.nextElementSibling;
+            if(prevBtn) prevBtn.style.opacity = _homePeriodIdx > 0 ? '1' : '0.3';
+            if(nextBtn) nextBtn.style.opacity = _homePeriodIdx < _homePeriods.length-1 ? '1' : '0.3';
         }
-
-        const year  = +yearEl.value;
-        const month = +monthEl.value;
 
         const data     = JSON.parse(localStorage.getItem('days'))     || [];
         const calendar = JSON.parse(localStorage.getItem('calendar')) || [];
-        const settings = JSON.parse(localStorage.getItem('settings')) || { hourRate:139, cartRate:8, ndfl:0.13 };
 
-        const monthData = data.filter(d=>{
-            const p = d.date.split('-');
-            return +p[0]===year && +p[1]-1===month;
-        });
-
-        const workDays = calendar.filter(c=>{
-            const d = new Date(c.date);
-            return d.getFullYear()===year && d.getMonth()===month && (c.type==='work'||c.type==='extra');
-        }).length;
+        const monthData = data.filter(d=>{ const p=d.date.split('-'); return +p[0]===year && +p[1]-1===month; });
+        const workDays  = calendar.filter(c=>{ const d=new Date(c.date); return d.getFullYear()===year && d.getMonth()===month && (c.type==='work'||c.type==='extra'); }).length;
 
         let totalAfter=0, totalBefore=0, totalHours=0, totalCarts=0, totalPicks=0, worked=0;
-        monthData.forEach(d=>{
-            totalAfter  += d.final;
-            totalBefore += d.total;
-            totalHours  += d.hours;
-            totalCarts  += d.carts;
-            worked++;
-            d.picks.forEach(p=>{ totalPicks += p.qty; });
-        });
+        monthData.forEach(d=>{ totalAfter+=d.final; totalBefore+=d.total; totalHours+=d.hours; totalCarts+=d.carts; worked++; d.picks.forEach(p=>{totalPicks+=p.qty;}); });
 
-        const avg      = worked ? totalAfter/worked : 0;
-        const forecast = avg * workDays;
-        const ndfl     = totalBefore - totalAfter;
-        const mn       = monthNames[month];
-
-        // Обновляем UI с анимацией счётчиков
+        const avg = worked ? totalAfter/worked : 0;
         const fmt = n => n > 0 ? Math.round(n).toLocaleString('ru-RU') + ' ₽' : '— ₽';
 
-        document.getElementById('heroMonth').textContent   = mn + ' ' + year;
+        document.getElementById('heroMonth').textContent  = _monthNames[month] + ' ' + year;
+        if(totalAfter > 0) animateCount(document.getElementById('heroAmount'), 0, Math.round(totalAfter), 800);
+        else document.getElementById('heroAmount').textContent = '—';
+        document.getElementById('heroBefore').textContent = totalBefore > 0 ? fmt(totalBefore) : '—';
+        document.getElementById('heroNdfl').textContent   = (totalBefore-totalAfter) > 0 ? fmt(totalBefore-totalAfter) : '—';
+        document.getElementById('heroShifts').textContent = worked || '—';
 
-        // Анимируем главную сумму
-        if(totalAfter > 0){
-            animateCount(document.getElementById('heroAmount'), 0, Math.round(totalAfter), 800);
-        } else {
-            document.getElementById('heroAmount').textContent = '—';
-        }
-
-        document.getElementById('heroBefore').textContent  = totalBefore > 0 ? fmt(totalBefore) : '—';
-        document.getElementById('heroNdfl').textContent    = ndfl > 0 ? fmt(ndfl) : '—';
-        document.getElementById('heroShifts').textContent  = worked || '—';
-
-        // Анимируем виджеты
-        if(worked > 0) animateCount(document.getElementById('wDays'),  0, worked,      500);
+        if(worked > 0)      animateCount(document.getElementById('wDays'),  0, worked,      500);
         else document.getElementById('wDays').textContent = '—';
-
-        if(totalHours > 0) animateCount(document.getElementById('wHours'), 0, totalHours, 600);
+        if(totalHours > 0)  animateCount(document.getElementById('wHours'), 0, totalHours, 600);
         else document.getElementById('wHours').textContent = '—';
-
-        if(totalPicks > 0) animateCount(document.getElementById('wPicks'), 0, totalPicks, 650);
+        if(totalPicks > 0)  animateCount(document.getElementById('wPicks'), 0, totalPicks, 650);
         else document.getElementById('wPicks').textContent = '—';
-
-        if(totalCarts > 0) animateCount(document.getElementById('wCarts'), 0, totalCarts, 550);
+        if(totalCarts > 0)  animateCount(document.getElementById('wCarts'), 0, totalCarts, 550);
         else document.getElementById('wCarts').textContent = '—';
 
-        document.getElementById('wDaysPlan').textContent   = workDays ? 'План: ' + workDays : '';
-        document.getElementById('wAvg').textContent        = avg > 0 ? fmt(avg) : '— ₽';
-        document.getElementById('wForecast').textContent   = forecast > 0 ? fmt(forecast) : '— ₽';
-
-        // Синхронизируем шапку
-        const headerMonth = document.getElementById('headerMonth');
-        if(headerMonth) headerMonth.textContent = mn + ' ' + year;
+        document.getElementById('wDaysPlan').textContent = workDays ? 'План: ' + workDays : '';
+        document.getElementById('wAvg').textContent      = avg > 0 ? fmt(avg) : '— ₽';
+        document.getElementById('wForecast').textContent = (avg*workDays) > 0 ? fmt(avg*workDays) : '— ₽';
+        const hm = document.getElementById('headerMonth');
+        if(hm) hm.textContent = _monthNames[month] + ' ' + year;
     }
 
     // ДОБАВИТЬ СКЛАД
@@ -2169,6 +2194,11 @@ let forecastNdfl =
         <div style="display:flex;justify-content:space-between;padding:12px 4px 0;align-items:center;border-top:1px solid rgba(255,255,255,0.3);">
             <span style="font-size:15px;font-weight:700;">К выплате</span>
             <span style="font-size:28px;font-weight:800;letter-spacing:-1px;">${remainderAfter.toFixed(2)} ₽</span>
+        </div>
+
+        <div style="background:rgba(0,0,0,0.15);border-radius:8px;padding:8px 12px;margin-top:10px;display:flex;justify-content:space-between;font-size:12px;">
+            <span style="opacity:0.8;">Всего НДФЛ удержано за месяц</span>
+            <span style="font-weight:700;">${totalNdflFull.toFixed(2)} ₽</span>
         </div>
     </div>`;
 
@@ -3199,6 +3229,7 @@ function renderCalendar(){
     if(monthSel) monthSel.value = now.getMonth();
 
     // Запускаем главную страницу
+    initHomePeriods();
     refreshHome();
     updateCalTitle();
     initCalendarSwipe();
@@ -3666,6 +3697,62 @@ function exportCSV(){
         document.execCommand('copy');
     }
 }
+
+// РЕЗЕРВНАЯ КОПИЯ ─────────────────────────────────
+
+function exportBackup(){
+    const backup = {
+        version:  '1.0',
+        date:     new Date().toISOString(),
+        appName:  'Магнит Зарплата',
+        days:     JSON.parse(localStorage.getItem('days'))     || [],
+        calendar: JSON.parse(localStorage.getItem('calendar')) || [],
+        settings: JSON.parse(localStorage.getItem('settings')) || {},
+        fines:    {}
+    };
+    for(let i = 0; i < localStorage.length; i++){
+        const key = localStorage.key(i);
+        if(key && key.startsWith('fines_')){
+            backup.fines[key] = JSON.parse(localStorage.getItem(key));
+        }
+    }
+    const json    = JSON.stringify(backup, null, 2);
+    const blob    = new Blob([json], {type:'application/json'});
+    const now     = new Date();
+    const ds      = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+    const url     = URL.createObjectURL(blob);
+    const a       = document.createElement('a');
+    a.href = url; a.download = `Магнит_Резервная_Копия_${ds}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 3000);
+    const btn = document.querySelector('[onclick="exportBackup()"]');
+    if(btn){ const orig=btn.innerHTML; btn.innerHTML='✅ Сохранено!'; btn.style.background='var(--green)'; setTimeout(()=>{btn.innerHTML=orig;btn.style.background='var(--blue)';},2000); }
+}
+
+function importBackup(event){
+    const file = event.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e){
+        try {
+            const backup = JSON.parse(e.target.result);
+            if(!backup.appName){ alert('❌ Файл не является резервной копией Магнит Зарплата'); return; }
+            const count = backup.days ? backup.days.length : 0;
+            const dateStr = backup.date ? new Date(backup.date).toLocaleString('ru-RU') : 'неизвестно';
+            if(!confirm(`Восстановить данные из резервной копии?\n\nДата копии: ${dateStr}\nЗаписей: ${count} дней\n\n⚠️ Текущие данные будут заменены!`)) return;
+            if(backup.days)     localStorage.setItem('days',     JSON.stringify(backup.days));
+            if(backup.calendar) localStorage.setItem('calendar', JSON.stringify(backup.calendar));
+            if(backup.settings) localStorage.setItem('settings', JSON.stringify(backup.settings));
+            if(backup.fines){ for(const key in backup.fines) localStorage.setItem(key, JSON.stringify(backup.fines[key])); }
+            alert(`✅ Данные восстановлены!\n${count} записей загружено.`);
+            if(typeof initHomePeriods === 'function') initHomePeriods();
+            if(typeof refreshHome     === 'function') refreshHome();
+        } catch(err){ alert('❌ Ошибка: ' + err.message); }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+}
+
 </script>
 
 </body>
